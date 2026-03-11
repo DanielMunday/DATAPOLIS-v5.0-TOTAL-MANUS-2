@@ -1,0 +1,846 @@
+═══════════════════════════════════════════════════════════════════════════════
+PROMPTS DE RECTIFICACIÓN ARQUITECTÓNICA
+PAE — PRECESSION ANALYTICS ENGINE (M11)
+Migración a Cores Independientes con Sincronización Inteligente
+═══════════════════════════════════════════════════════════════════════════════
+
+Fecha: 06 de Febrero de 2026
+Autor: Daniel / DATAPOLIS SpA
+Prerequisito: Haber ejecutado Prompts A, B, C (DATAPOLIS) y D, E, F (ÁGORA)
+Objetivo: Transformar M11 PAE de Core Centralizado a Cores Independientes
+
+═══════════════════════════════════════════════════════════════════════════════
+INSTRUCCIONES DE USO
+═══════════════════════════════════════════════════════════════════════════════
+
+Estos dos prompts se ejecutan DESPUÉS de haber completado la implementación
+inicial del PAE en ambas plataformas. Su objetivo es RECTIFICAR la
+arquitectura para que cada plataforma tenga su propio PAE Core Engine
+nativo, eliminando la dependencia de un servicio centralizado externo.
+
+SECUENCIA:
+  1. Ejecutar PROMPT H en el chat DATAPOLIS v3.0
+  2. Ejecutar PROMPT I en el chat ÁGORA v4.0
+  3. Orden indistinto, pueden ejecutarse en paralelo
+
+ADJUNTAR a cada chat:
+  - PAE_Precession_Analytics_Engine_M11.docx (especificación técnica)
+  - PAE_Prompts_Implementacion_M11.txt (prompts originales, como referencia)
+
+═══════════════════════════════════════════════════════════════════════════════
+
+
+
+###########################################################################
+#                                                                         #
+#   PROMPT H — CHAT DATAPOLIS v3.0                                        #
+#   Rectificación: PAE Core Independiente Nativo PHP/Laravel              #
+#                                                                         #
+###########################################################################
+
+Copiar desde la línea "INICIO PROMPT H" hasta "FIN PROMPT H":
+
+--- INICIO PROMPT H ---
+
+═══════════════════════════════════════════════════════════════════════════
+RECTIFICACIÓN ARQUITECTÓNICA M11 PAE
+De Core Centralizado → Core Independiente Nativo PHP/Laravel
+═══════════════════════════════════════════════════════════════════════════
+
+CONTEXTO DE CAMBIO:
+
+El módulo M11 PAE fue implementado inicialmente con arquitectura
+centralizada, donde PrecessionService.php actúa como CLIENTE HTTP que
+consume un PAE Core externo en FastAPI (Multi-Agent System).
+
+Se requiere RECTIFICAR esta arquitectura para que DATAPOLIS v3.0 tenga
+su propio PAE Core Engine NATIVO en PHP/Laravel, eliminando la dependencia
+del servicio externo FastAPI para el análisis precesional.
+
+ARQUITECTURA ANTERIOR (a eliminar):
+┌─────────────────────────┐
+│ DATAPOLIS v3.0          │
+│ PrecessionService.php   │──── HTTP POST ────► PAE Core (FastAPI)
+│ (cliente)               │                     (servicio externo)
+└─────────────────────────┘
+
+ARQUITECTURA NUEVA (a implementar):
+┌──────────────────────────────────────────────┐
+│ DATAPOLIS v3.0                               │
+│                                              │
+│  ┌────────────────────────────────────────┐  │
+│  │ M11-DP PAE CORE ENGINE (PHP nativo)   │  │
+│  │                                        │  │
+│  │  ┌──────────────┐ ┌────────────────┐  │  │
+│  │  │ Graph Engine │ │ Scoring Engine │  │  │
+│  │  │ (PHP)        │ │ (PHP)          │  │  │
+│  │  └──────────────┘ └────────────────┘  │  │
+│  │  ┌──────────────┐ ┌────────────────┐  │  │
+│  │  │ ML Connector │ │ Alert Engine   │  │  │
+│  │  │ (Ollama HTTP)│ │ (PHP)          │  │  │
+│  │  └──────────────┘ └────────────────┘  │  │
+│  └────────────────────────────────────────┘  │
+│                                              │
+│  Sincronización con ÁGORA vía Event Bus      │
+└──────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════
+REFACTORIZAR EN ESTE ORDEN:
+═══════════════════════════════════════════════════════════════════════════
+
+1. CREAR PRECESSION GRAPH ENGINE NATIVO (PHP):
+───────────────────────────────────────────────
+   Archivo: app/Services/PAE/PrecessionGraphEngine.php
+
+   FUNCIONALIDAD:
+   - Grafo dirigido ponderado implementado en PHP puro
+     (usar estructura de datos: nodos como array asociativo,
+     aristas como lista de adyacencia con pesos)
+   - NO depende de NetworkX ni de Python
+   - Cargar ontología base de relaciones precesionales urbanas
+     (mismos nodos y aristas definidos en la especificación PAE)
+
+   NODOS BASE (misma ontología que ÁGORA, para consistencia):
+   - permisos_edificacion (DOM)
+   - valor_suelo_m2 (SII)
+   - densidad_poblacional (INE)
+   - cobertura_equipamiento (MINVU)
+   - indice_morosidad (DATAPOLIS)
+   - compliance_score (DATAPOLIS)
+   - gasto_comun_promedio (DATAPOLIS)
+   - tasa_vacancia (DATAPOLIS)
+   - indice_arriendo_m2 (DATAPOLIS)
+   - carga_tributaria (SII/DATAPOLIS)
+   - antiguedad_edificacion (DOM)
+   - calidad_construccion (MINVU)
+
+   ARISTAS BASE (con ángulo, peso, lag temporal, confianza):
+   - permisos_edificacion → valor_suelo_m2 (45°, 0.72, 12 meses, 0.85)
+   - permisos_edificacion → densidad_poblacional (90°, 0.65, 24 meses, 0.78)
+   - densidad_poblacional → cobertura_equipamiento (90°, 0.58, 36 meses, 0.72)
+   - valor_suelo_m2 → indice_morosidad (180°, -0.45, 18 meses, 0.68)
+   - valor_suelo_m2 → indice_arriendo_m2 (45°, 0.78, 6 meses, 0.82)
+   - valor_suelo_m2 → gasto_comun_promedio (90°, 0.42, 12 meses, 0.65)
+   - compliance_score → valor_suelo_m2 (90°, 0.35, 18 meses, 0.60)
+   - carga_tributaria → indice_morosidad (45°, 0.55, 6 meses, 0.75)
+   - antiguedad_edificacion → gasto_comun_promedio (45°, 0.48, 12 meses, 0.70)
+   - tasa_vacancia → valor_suelo_m2 (180°, -0.52, 12 meses, 0.72)
+
+   MÉTODOS PRINCIPALES:
+   - addNode(string $id, array $data): void
+   - addEdge(string $source, string $target, array $data): void
+   - analyzePrecession(array $intervention, int $maxDepth = 4,
+     int $timeHorizonMonths = 60): array
+     → Implementar BFS desde nodo de intervención
+     → Clasificar efectos por ángulo: 0°, 45°, 90°, 135°, 180°
+     → Calcular peso acumulado con decay por profundidad
+     → Retornar array estructurado por tipo de efecto
+   - calculateMultiplier(array $analysisResults): float
+   - getAffectedNodes(string $nodeId, int $depth): array
+   - exportOntology(): array (para sincronización con ÁGORA)
+   - importOntology(array $ontology): void (desde ÁGORA)
+
+2. CREAR SCORING ENGINE NATIVO (PHP):
+─────────────────────────────────────
+   Archivo: app/Services/PAE/PrecessionScoringEngine.php
+
+   FUNCIONALIDAD:
+   - Cálculo de scores precesionales sin dependencia externa
+   - Algoritmos de scoring implementados en PHP puro
+
+   MÉTODOS:
+   - calculatePrecessionScore(array $effects): float (0-100)
+     → Ponderar efectos por ángulo:
+       0° = peso 1.0, 45° = 1.2, 90° = 1.5, 135° = 1.3, 180° = 0.8
+     → Normalizar a escala 0-100
+   - calculateRiskScore(array $effects): float (0-1)
+     → Identificar efectos negativos (weight < 0)
+     → Ponderar por confianza y horizonte temporal
+     → Mayor riesgo = efectos negativos de alta confianza a corto plazo
+   - calculateOpportunityScore(array $effects): float (0-1)
+     → Identificar efectos positivos (weight > 0)
+     → Ponderar por magnitud y ventana temporal
+   - calculateInvestmentScore(array $copropiedadData,
+     array $precessionAnalysis): array
+     → Score compuesto: precesión (40%) + financiero (30%) +
+       compliance (20%) + ubicación (10%)
+     → Retornar: score, nivel_riesgo, recomendación, horizonte
+   - compareCopropiedades(array $ids): array
+     → Ranking por score precesional
+     → Análisis diferencial entre propiedades
+
+3. CREAR ML CONNECTOR (HTTP A OLLAMA):
+──────────────────────────────────────
+   Archivo: app/Services/PAE/PrecessionMLConnector.php
+
+   FUNCIONALIDAD:
+   - Conexión HTTP a Ollama local para predicciones narrativas
+   - Predicciones estadísticas básicas en PHP (regresión lineal,
+     medias móviles, tendencias) para cuando Ollama no está disponible
+   - NO reemplaza los modelos ML pesados (XGBoost, Prophet, LSTM)
+     que siguen en Python, pero provee fallback funcional
+
+   MÉTODOS:
+   - predictWithOllama(string $prompt, array $context): string
+     → POST http://localhost:11434/api/generate
+     → Model: qwen2.5:7b para análisis, llama3.2:8b para narrativas
+   - predictTrend(array $historicalData, int $horizonMonths): array
+     → Regresión lineal simple en PHP
+     → Media móvil exponencial
+     → Retornar: valor_predicho, intervalo_confianza, tendencia
+   - predictMorosidad(array $copropiedadData): array
+     → Heurísticas basadas en reglas del dominio:
+       valor_suelo ↑ + gasto_comun ↑ = morosidad ↑
+       compliance_score ↑ = morosidad ↓
+       antiguedad ↑ + sin_mantenimiento = morosidad ↑
+   - generateNarrative(array $analysis): string
+     → Usar Ollama para generar narrativa en español
+     → Template: "Análisis precesional de [copropiedad]: ..."
+   - isOllamaAvailable(): bool
+     → Health check a Ollama, caché 60 segundos
+
+4. CREAR ALERT ENGINE NATIVO (PHP):
+───────────────────────────────────
+   Archivo: app/Services/PAE/PrecessionAlertEngine.php
+
+   FUNCIONALIDAD:
+   - Motor de detección de alertas precesionales
+   - Evaluación de umbrales configurables
+   - Generación de alertas sin dependencia externa
+
+   MÉTODOS:
+   - evaluateThresholds(array $analysis): array
+     → Umbrales predefinidos:
+       CRITICAL: risk_score > 0.8 OR efecto negativo confianza > 0.85
+       WARNING: risk_score > 0.5 OR cambio score > 20% en 30 días
+       INFO: nuevo efecto precesional detectado
+   - generateAlert(string $type, string $severity, array $data): PrecessionAlert
+   - getActiveAlerts(int $copropiedadId = null): Collection
+   - markAsRead(int $alertId): void
+   - configureThresholds(array $thresholds): void
+     → Permitir personalización por copropiedad/administrador
+
+5. REFACTORIZAR PrecessionService.php:
+──────────────────────────────────────
+   Archivo: app/Services/PrecessionService.php (MODIFICAR existente)
+
+   CAMBIOS REQUERIDOS:
+   - ELIMINAR: toda llamada HTTP POST al PAE Core externo FastAPI
+   - ELIMINAR: dependencia de $this->paeApiUrl y $this->paeApiKey
+   - INYECTAR: PrecessionGraphEngine, PrecessionScoringEngine,
+     PrecessionMLConnector, PrecessionAlertEngine
+   - El servicio ahora ORQUESTA los engines nativos en vez de
+     delegar a un servicio externo
+
+   CONSTRUCTOR NUEVO:
+   public function __construct(
+       PrecessionGraphEngine $graphEngine,
+       PrecessionScoringEngine $scoringEngine,
+       PrecessionMLConnector $mlConnector,
+       PrecessionAlertEngine $alertEngine
+   )
+
+   MÉTODO analyzeCopropiedad() REFACTORIZADO:
+   - Paso 1: buildContext() → recopilar datos módulos (SIN CAMBIO)
+   - Paso 2: $this->graphEngine->analyzePrecession($context)
+     (ANTES: HTTP POST al PAE Core externo)
+     (AHORA: llamada local in-process)
+   - Paso 3: $this->scoringEngine->calculatePrecessionScore($effects)
+   - Paso 4: $this->mlConnector->predictTrend($historical)
+   - Paso 5: $this->alertEngine->evaluateThresholds($analysis)
+   - Paso 6: Persistir en precession_analyses (SIN CAMBIO)
+   - Paso 7: Publicar evento Event Bus (SIN CAMBIO)
+
+   MANTENER SIN CAMBIOS:
+   - Todos los métodos build*Context() (tributario, gastos, compliance)
+   - Toda la integración con módulos M04-M16
+   - Eventos y listeners existentes
+   - Rutas API existentes
+   - Cache Redis existente
+
+6. AGREGAR SINCRONIZACIÓN CON ÁGORA:
+────────────────────────────────────
+   Archivo: app/Services/PAE/PrecessionSyncService.php
+
+   FUNCIONALIDAD:
+   - Sincronización de ontología (grafos) con ÁGORA v4.0
+   - Intercambio de alertas cross-platform
+   - Feedback loop para calibración de modelos
+
+   MÉTODOS:
+   - syncOntologyToAgora(): void
+     → Publicar al Event Bus: pae.ontology.updated
+     → Payload: exportOntology() del GraphEngine
+     → Frecuencia: cuando se modifique la ontología o diariamente
+   - receiveOntologyFromAgora(array $ontology): void
+     → Suscribir evento: pae.agora.ontology.updated
+     → Merge inteligente: mantener nodos locales + incorporar
+       nodos territoriales de ÁGORA que no existan
+   - publishCrossAlert(PrecessionAlert $alert): void
+     → Si alert afecta zona territorial → notificar ÁGORA
+     → Evento: pae.datapolis.alert.cross_platform
+     → Casos: cluster morosidad alta, cambio valorización >15%,
+       ola de regularizaciones compliance
+   - receiveCrossAlert(array $alertData): void
+     → Suscribir: pae.agora.alert.cross_platform
+     → Crear alerta local para copropiedades en zona afectada
+     → Casos: cambio uso suelo, nueva infraestructura, presión PRC
+   - syncFeedback(array $predictionResult): void
+     → Reportar accuracy de predicciones al Event Bus
+     → Evento: pae.feedback.prediction_result
+     → Permite que ambas plataformas calibren modelos
+
+7. REGISTRAR EN SERVICE PROVIDER:
+─────────────────────────────────
+   Archivo: app/Providers/PAEServiceProvider.php (CREAR)
+
+   - Registrar como singletons:
+     PrecessionGraphEngine
+     PrecessionScoringEngine
+     PrecessionMLConnector
+     PrecessionAlertEngine
+     PrecessionSyncService
+   - Inicializar ontología base en boot()
+   - Registrar event listeners para sincronización
+   - Agregar al array 'providers' en config/app.php
+
+8. ACTUALIZAR CONFIGURACIÓN:
+────────────────────────────
+   Archivo: config/datapolis.php (MODIFICAR)
+
+   ELIMINAR:
+   - 'pae_api_url' (ya no se usa servicio externo)
+   - 'pae_api_key' (ya no se usa servicio externo)
+
+   AGREGAR:
+   - 'pae' => [
+       'graph' => [
+           'max_depth' => 4,
+           'default_time_horizon' => 60,  // meses
+           'decay_factor' => 0.85,        // por nivel profundidad
+       ],
+       'scoring' => [
+           'weights' => [
+               'precession' => 0.40,
+               'financial' => 0.30,
+               'compliance' => 0.20,
+               'location' => 0.10,
+           ],
+       ],
+       'ml' => [
+           'ollama_url' => env('OLLAMA_URL', 'http://localhost:11434'),
+           'ollama_model_analysis' => env('OLLAMA_MODEL', 'qwen2.5:7b'),
+           'ollama_model_narrative' => 'llama3.2:8b',
+           'fallback_enabled' => true,
+       ],
+       'alerts' => [
+           'critical_threshold' => 0.8,
+           'warning_threshold' => 0.5,
+           'change_threshold_percent' => 20,
+       ],
+       'sync' => [
+           'enabled' => env('PAE_SYNC_ENABLED', true),
+           'ontology_sync_cron' => '0 2 * * *',  // 2am diario
+       ],
+     ]
+
+9. TESTS:
+─────────
+   - tests/Unit/PAE/PrecessionGraphEngineTest.php
+     → testAddNode, testAddEdge, testAnalyzePrecession,
+       testCalculateMultiplier, testBFSDepthLimit
+   - tests/Unit/PAE/PrecessionScoringEngineTest.php
+     → testScoreRange0to100, testRiskScore, testOpportunityScore,
+       testInvestmentScoreComposite
+   - tests/Unit/PAE/PrecessionAlertEngineTest.php
+     → testCriticalThreshold, testWarningThreshold, testInfoGeneration
+   - tests/Feature/PAE/PrecessionIntegrationTest.php
+     → testFullAnalysisCopropiedadWithoutExternalAPI
+     → testEndToEndNoHTTPDependency
+     → Verificar que NINGÚN test hace HTTP al servicio externo
+
+═══════════════════════════════════════════════════════════════════════════
+CRITERIOS DE VALIDACIÓN:
+═══════════════════════════════════════════════════════════════════════════
+
+☐ ZERO llamadas HTTP al PAE Core externo FastAPI (grep -r "pae_api_url")
+☐ PrecessionGraphEngine ejecuta analyzePrecession() in-process < 50ms
+☐ PrecessionScoringEngine calcula scores consistentes (0-100)
+☐ PrecessionMLConnector funciona CON y SIN Ollama (fallback activo)
+☐ PrecessionAlertEngine genera alertas correctas por umbral
+☐ PrecessionService.php orquesta los 4 engines sin dependencia externa
+☐ PrecessionSyncService publica/suscribe eventos con ÁGORA
+☐ Todos los endpoints API existentes siguen funcionando sin cambios
+☐ Todas las integraciones con M04-M16 siguen funcionando sin cambios
+☐ Tests pasan sin ninguna llamada a servicio externo
+☐ config/datapolis.php NO contiene pae_api_url ni pae_api_key
+☐ PAEServiceProvider registrado y funcional
+
+═══════════════════════════════════════════════════════════════════════════
+
+--- FIN PROMPT H ---
+
+
+
+###########################################################################
+#                                                                         #
+#   PROMPT I — CHAT ÁGORA v4.0                                            #
+#   Rectificación: PAE Core Independiente Nativo Python/FastAPI           #
+#                                                                         #
+###########################################################################
+
+Copiar desde la línea "INICIO PROMPT I" hasta "FIN PROMPT I":
+
+--- INICIO PROMPT I ---
+
+═══════════════════════════════════════════════════════════════════════════
+RECTIFICACIÓN ARQUITECTÓNICA M11 PAE
+De Core Centralizado → Core Independiente Nativo Python/FastAPI
+═══════════════════════════════════════════════════════════════════════════
+
+CONTEXTO DE CAMBIO:
+
+El módulo M11 PAE en ÁGORA v4.0 fue implementado inicialmente como parte
+del Sistema Multi-Agente centralizado, donde los servicios de ÁGORA
+consumen el PAE Core como un módulo más del Multi-Agent.
+
+Se requiere RECTIFICAR para que ÁGORA v4.0 tenga su propio PAE Core
+Engine NATIVO integrado directamente en su arquitectura FastAPI, operando
+de forma AUTÓNOMA sin depender del Multi-Agent System para el análisis
+precesional básico.
+
+ARQUITECTURA ANTERIOR (a rectificar):
+┌───────────────────┐
+│ ÁGORA v4.0        │
+│ precession_service│──── HTTP ────► Multi-Agent M11 (servicio externo)
+│ (cliente)         │                PAE Core compartido
+└───────────────────┘
+
+ARQUITECTURA NUEVA (a implementar):
+┌──────────────────────────────────────────────────────────┐
+│ ÁGORA v4.0                                               │
+│                                                          │
+│  ┌────────────────────────────────────────────────────┐  │
+│  │ M11-AG PAE CORE ENGINE (Python nativo)            │  │
+│  │                                                    │  │
+│  │  ┌──────────────────┐ ┌─────────────────────────┐ │  │
+│  │  │ Graph Engine     │ │ Spatial Precession      │ │  │
+│  │  │ (NetworkX)       │ │ Engine (PostGIS nativo) │ │  │
+│  │  └──────────────────┘ └─────────────────────────┘ │  │
+│  │  ┌──────────────────┐ ┌─────────────────────────┐ │  │
+│  │  │ ML Engine        │ │ Alert Engine            │ │  │
+│  │  │ (sklearn/Prophet)│ │ (Python nativo)         │ │  │
+│  │  └──────────────────┘ └─────────────────────────┘ │  │
+│  │  ┌──────────────────┐ ┌─────────────────────────┐ │  │
+│  │  │ Scoring Engine   │ │ Narrative Engine        │ │  │
+│  │  │ (numpy)          │ │ (Ollama)                │ │  │
+│  │  └──────────────────┘ └─────────────────────────┘ │  │
+│  └────────────────────────────────────────────────────┘  │
+│                                                          │
+│  Sincronización con DATAPOLIS vía Event Bus              │
+└──────────────────────────────────────────────────────────┘
+
+═══════════════════════════════════════════════════════════════════════════
+REFACTORIZAR EN ESTE ORDEN:
+═══════════════════════════════════════════════════════════════════════════
+
+1. REFACTORIZAR PRECESSION GRAPH ENGINE (ya existe, hacerlo autónomo):
+──────────────────────────────────────────────────────────────────────
+   Archivo: agora/engines/precession_graph_engine.py (MODIFICAR)
+
+   CAMBIOS:
+   - Si actualmente depende del Multi-Agent System para
+     inicialización o datos, ELIMINAR esas dependencias
+   - El engine debe inicializarse de forma autónoma con su
+     propia ontología base
+   - Mantener NetworkX como backend de grafos (es nativo Python)
+
+   ONTOLOGÍA BASE (IDÉNTICA a DATAPOLIS para consistencia):
+   Nodos:
+   - permisos_edificacion, valor_suelo_m2, densidad_poblacional,
+     cobertura_equipamiento, indice_morosidad, compliance_score,
+     gasto_comun_promedio, tasa_vacancia, indice_arriendo_m2,
+     carga_tributaria, antiguedad_edificacion, calidad_construccion
+
+   NODOS ADICIONALES (exclusivos territorio ÁGORA):
+   - indice_constructibilidad (PRC)
+   - coeficiente_ocupacion_suelo (PRC)
+   - superficie_areas_verdes (MINVU)
+   - indice_conectividad_transporte (MTT/SECTRA)
+   - indice_riesgo_ambiental (MMA/DGA)
+   - presion_demografica (INE proyecciones)
+   - indice_participacion_ciudadana (ÁGORA M6)
+   - cobertura_satelital_cambios (ÁGORA M8/Sentinel-2)
+
+   ARISTAS BASE (mismas que DATAPOLIS + territoriales):
+   [Mantener las 10 aristas base idénticas a DATAPOLIS]
+   
+   ARISTAS ADICIONALES (exclusivas territorio):
+   - permisos_edificacion → indice_constructibilidad (45°, 0.68, 6m, 0.80)
+   - densidad_poblacional → presion_demografica (90°, 0.72, 36m, 0.75)
+   - densidad_poblacional → superficie_areas_verdes (180°, -0.55, 24m, 0.70)
+   - indice_conectividad_transporte → valor_suelo_m2 (90°, 0.78, 18m, 0.82)
+   - indice_riesgo_ambiental → valor_suelo_m2 (180°, -0.62, 12m, 0.76)
+   - presion_demografica → cobertura_equipamiento (90°, -0.58, 36m, 0.72)
+   - cobertura_satelital_cambios → permisos_edificacion (45°, 0.40, 3m, 0.65)
+   - indice_participacion_ciudadana → compliance_score (90°, 0.32, 24m, 0.55)
+
+   MÉTODOS (verificar que todos existen y son autónomos):
+   - analyze_precession(intervention, max_depth=4, time_horizon=60)
+   - simulate_scenarios(comuna_code, n_scenarios=3)
+     → Monte Carlo: variar pesos ±20%, recalcular
+     → Retornar: escenario_optimista, base, pesimista
+   - calculate_multiplier(analysis_results) → float
+   - export_ontology() → dict (para sincronización con DATAPOLIS)
+   - import_ontology(ontology: dict) → None (desde DATAPOLIS)
+   - get_territorial_subgraph(comuna_code) → nx.DiGraph
+     → Subgrafo filtrado por relevancia territorial
+
+2. REFACTORIZAR SPATIAL PRECESSION ENGINE (hacerlo autónomo):
+────────────────────────────────────────────────────────────
+   Archivo: agora/engines/spatial_precession.py (MODIFICAR)
+
+   CAMBIOS:
+   - Eliminar dependencias del Multi-Agent System si las tiene
+   - Debe operar 100% con PostGIS + GeoAlchemy2 + Shapely
+   - Acceso directo a PostgreSQL (no vía servicio intermedio)
+
+   MÉTODOS (verificar autonomía):
+   - calculate_influence_zones(point, intervention_type)
+     → 5 anillos concéntricos: 300m/0°, 500m/45°, 1000m/90°,
+       2000m/135°, 5000m/180°
+     → PostGIS ST_Buffer + ST_Intersection con catastro
+   - generate_precession_heatmap(analysis, zones)
+     → Grid hexagonal H3 (resolution 7-9)
+     → Score por hexágono basado en efectos acumulados
+   - query_affected_parcels(buffer_geom, intervention_type, angle)
+     → Consulta PostGIS directa a tabla de parcelas
+   - calculate_isochrones(point, time_intervals)
+     → Isocronas temporales de manifestación de efectos
+   - overlay_with_prc(zones, comuna_code)
+     → Intersección zonas precesionales con PRC vigente
+     → Detectar zonas de tensión normativa
+   - export_geojson(zones) → dict
+   - export_mvt(zones, zoom) → bytes (tiles vectoriales)
+
+3. CREAR SCORING ENGINE TERRITORIAL (Python):
+─────────────────────────────────────────────
+   Archivo: agora/engines/precession_scoring_engine.py (CREAR)
+
+   FUNCIONALIDAD:
+   - Scoring precesional adaptado al dominio territorial
+   - Complementa al Graph Engine con métricas cuantitativas
+
+   MÉTODOS:
+   - calculate_territorial_score(analysis: dict) -> float
+     → Score 0-100 ponderado por dimensiones:
+       Económica (30%), Social (25%), Normativa (20%),
+       Ambiental (15%), Conectividad (10%)
+   - calculate_investment_opportunity(zona_data: dict) -> dict
+     → Score de oportunidad de inversión territorial
+     → Combina: valorización esperada, riesgo normativo,
+       demanda proyectada, competencia zona
+   - calculate_municipal_impact(intervention: dict) -> dict
+     → Impacto para presupuesto municipal
+     → Proyección: ingresos por patentes, permisos, contribuciones
+   - compare_zones(zone_ids: list) -> dict
+     → Ranking de zonas por score precesional
+   - calculate_roi_precesional(inversion_uf: float,
+     analysis: dict) -> dict
+     → Multiplicador precesional
+     → ROI directo vs ROI incluyendo efectos precesionales
+     → Horizonte de recuperación
+
+4. CREAR ALERT ENGINE TERRITORIAL (Python):
+───────────────────────────────────────────
+   Archivo: agora/engines/precession_alert_engine.py (CREAR)
+
+   FUNCIONALIDAD:
+   - Alertas precesionales específicas para dominio territorial
+
+   MÉTODOS:
+   - evaluate_territorial_thresholds(analysis: dict) -> list
+     → Umbrales:
+       CRITICAL:
+         - Presión PRC > 0.85 (cambio regulatorio inminente)
+         - Riesgo ambiental precesional > 0.80
+         - Déficit equipamiento proyectado > 40%
+       WARNING:
+         - Valorización precesional > 30% en zona
+         - Presión demográfica sin infraestructura
+         - Tensión entre PRC y uso real detectado
+       INFO:
+         - Nuevo polo comercial emergente detectado
+         - Cambio tendencia mercado suelo
+         - Oportunidad inversión identificada
+   - generate_municipal_alert(type, severity, data) -> PrecessionAlert
+   - generate_investor_alert(type, severity, data) -> PrecessionAlert
+   - get_active_alerts(comuna_code=None) -> list
+   - configure_thresholds(custom_thresholds: dict) -> None
+
+5. REFACTORIZAR ML PREDICTION ENGINE (hacerlo autónomo):
+───────────────────────────────────────────────────────
+   Archivo: agora/engines/ml_prediction_engine.py (MODIFICAR)
+
+   CAMBIOS:
+   - Eliminar dependencias del Multi-Agent System si las tiene
+   - Acceso directo a scikit-learn, Prophet, numpy, pandas
+   - Conexión directa a Ollama (no vía Multi-Agent)
+
+   MODELOS (verificar que operan autónomamente):
+   - XGBoost: predicción valorización territorial
+   - Prophet: series temporales (permisos, transacciones, población)
+   - Random Forest: predicción densificación
+   - Gradient Boosting: demanda equipamiento
+   - Regresión lineal: fallback cuando no hay datos suficientes
+
+   MÉTODOS:
+   - predict_valuation(zone_data, horizon_months) -> dict
+   - predict_densification(prc_data, permits_data) -> dict
+   - predict_equipment_demand(population_data) -> dict
+   - predict_prc_pressure(current_prc, market_data) -> dict
+   - generate_narrative(analysis, model='qwen2.5:7b') -> str
+     → Conexión directa a Ollama http://localhost:11434
+   - train_models(training_data) -> dict  (re-entrenamiento)
+   - evaluate_model_accuracy(predictions, actuals) -> dict
+
+6. REFACTORIZAR precession_service.py (servicio orquestador):
+────────────────────────────────────────────────────────────
+   Archivo: agora/services/precession_service.py (MODIFICAR)
+
+   CAMBIOS:
+   - ELIMINAR: toda llamada HTTP al Multi-Agent System para PAE
+   - ELIMINAR: dependencia de MultiAgentClient para precesión
+   - INYECTAR: todos los engines como dependencias directas
+
+   CONSTRUCTOR NUEVO:
+   def __init__(self):
+       self.graph_engine = PrecessionGraphEngine()
+       self.spatial_engine = SpatialPrecessionEngine()
+       self.scoring_engine = PrecessionScoringEngine()
+       self.ml_engine = MLPredictionEngine()
+       self.alert_engine = PrecessionAlertEngine()
+
+   MÉTODO analyze_precession() REFACTORIZADO:
+   - Paso 1: build_territorial_context() (SIN CAMBIO)
+   - Paso 2: self.graph_engine.analyze_precession(context)
+     (ANTES: posible llamada al Multi-Agent)
+     (AHORA: ejecución local directa)
+   - Paso 3: self.spatial_engine.calculate_influence_zones(...)
+     (DIRECTO, no vía servicio intermedio)
+   - Paso 4: self.ml_engine.predict_valuation(...)
+     (DIRECTO)
+   - Paso 5: self.scoring_engine.calculate_territorial_score(...)
+   - Paso 6: self.alert_engine.evaluate_territorial_thresholds(...)
+   - Paso 7: Persistir resultados (SIN CAMBIO)
+   - Paso 8: Publicar eventos Event Bus (SIN CAMBIO)
+
+   MANTENER SIN CAMBIOS:
+   - Todos los métodos build_*_context() para módulos M1-M8
+   - Toda la integración con módulos ÁGORA existentes
+   - Endpoints del precession_router.py
+   - Integración con ChromaDB para RAG
+
+7. AGREGAR SINCRONIZACIÓN CON DATAPOLIS:
+────────────────────────────────────────
+   Archivo: agora/services/precession_sync_service.py (CREAR)
+
+   FUNCIONALIDAD:
+   - Sincronización bidireccional de ontología con DATAPOLIS v3.0
+   - Intercambio de alertas cross-platform
+   - Feedback loop compartido
+
+   MÉTODOS:
+   - async sync_ontology_to_datapolis() -> None
+     → Publicar al Event Bus: pae.ontology.updated
+     → Payload: graph_engine.export_ontology()
+     → Incluir nodos territoriales exclusivos de ÁGORA
+   - async receive_ontology_from_datapolis(ontology: dict) -> None
+     → Suscribir evento: pae.datapolis.ontology.updated
+     → Merge: mantener nodos territoriales + incorporar
+       nodos de copropiedades de DATAPOLIS que no existan
+     → Esto ENRIQUECE el grafo de ÁGORA con datos micro
+   - async publish_cross_alert(alert: PrecessionAlert) -> None
+     → Si alerta afecta zona con copropiedades → notificar DATAPOLIS
+     → Evento: pae.agora.alert.cross_platform
+     → Casos: cambio uso suelo, nueva infraestructura, presión PRC,
+       riesgo ambiental zona
+   - async receive_cross_alert(alert_data: dict) -> None
+     → Suscribir: pae.datapolis.alert.cross_platform
+     → Incorporar señal de cluster micro (ej: morosidad alta en zona)
+       como input para re-análisis territorial
+   - async sync_feedback(prediction_result: dict) -> None
+     → Compartir accuracy de predicciones
+     → Evento: pae.feedback.prediction_result
+
+   EVENT BUS SUBSCRIPTIONS (registrar en startup):
+   - pae.datapolis.ontology.updated → receive_ontology_from_datapolis
+   - pae.datapolis.alert.cross_platform → receive_cross_alert
+   - pae.feedback.prediction_result → update_model_calibration
+
+8. REGISTRAR EN STARTUP:
+────────────────────────
+   Archivo: agora/main.py o agora/core/startup.py (MODIFICAR)
+
+   - Inicializar PrecessionGraphEngine con ontología base en startup
+   - Inicializar SpatialPrecessionEngine con conexión PostGIS
+   - Registrar PrecessionSyncService event listeners
+   - Agregar health check: GET /pae/health
+     → Verificar: graph_engine OK, spatial OK, ml OK, ollama OK/degraded
+   - Programar tarea Celery: sync_ontology cada 24h (2am)
+
+9. ACTUALIZAR CONFIGURACIÓN:
+────────────────────────────
+   Archivo: agora/core/config.py o .env (MODIFICAR)
+
+   AGREGAR:
+   PAE_GRAPH_MAX_DEPTH=4
+   PAE_GRAPH_TIME_HORIZON=60
+   PAE_GRAPH_DECAY_FACTOR=0.85
+   PAE_SCORING_WEIGHT_ECONOMIC=0.30
+   PAE_SCORING_WEIGHT_SOCIAL=0.25
+   PAE_SCORING_WEIGHT_NORMATIVE=0.20
+   PAE_SCORING_WEIGHT_ENVIRONMENTAL=0.15
+   PAE_SCORING_WEIGHT_CONNECTIVITY=0.10
+   PAE_OLLAMA_URL=http://localhost:11434
+   PAE_OLLAMA_MODEL=qwen2.5:7b
+   PAE_SYNC_ENABLED=true
+   PAE_SYNC_CRON=0 2 * * *
+   PAE_ALERT_CRITICAL=0.8
+   PAE_ALERT_WARNING=0.5
+
+   ELIMINAR (si existe):
+   PAE_MULTIAGENT_URL (ya no se usa)
+   PAE_EXTERNAL_API_KEY (ya no se usa)
+
+10. TESTS:
+──────────
+   - tests/unit/pae/test_graph_engine.py
+     → test_autonomous_initialization (sin Multi-Agent)
+     → test_analyze_precession_no_external_calls
+     → test_ontology_export_import_consistency
+     → test_monte_carlo_simulation
+   - tests/unit/pae/test_spatial_engine.py
+     → test_influence_zones_postgis_direct
+     → test_heatmap_generation
+     → test_prc_overlay
+   - tests/unit/pae/test_scoring_engine.py
+     → test_territorial_score_range
+     → test_investment_opportunity
+     → test_municipal_impact
+   - tests/unit/pae/test_alert_engine.py
+     → test_critical_thresholds
+     → test_municipal_alerts
+   - tests/integration/pae/test_full_autonomous.py
+     → test_complete_analysis_no_multiagent_dependency
+     → test_pudahuel_case_autonomous
+     → Verificar que NINGÚN test llama al Multi-Agent System
+
+═══════════════════════════════════════════════════════════════════════════
+CRITERIOS DE VALIDACIÓN:
+═══════════════════════════════════════════════════════════════════════════
+
+☐ ZERO dependencias del Multi-Agent System para análisis precesional
+☐ Graph Engine inicializa autónomamente con ontología completa (base + territorial)
+☐ Spatial Engine opera directo con PostGIS (no vía servicio intermedio)
+☐ ML Engine ejecuta predicciones sin Multi-Agent (sklearn + Prophet + Ollama directo)
+☐ Scoring Engine calcula scores territoriales correctamente (0-100)
+☐ Alert Engine genera alertas por umbrales configurables
+☐ precession_service.py orquesta todos los engines sin llamadas externas
+☐ PrecessionSyncService publica/suscribe eventos con DATAPOLIS
+☐ Ontología base tiene 20 nodos (12 compartidos + 8 exclusivos territorio)
+☐ Todos los endpoints del precession_router.py siguen funcionando
+☐ Todas las integraciones con módulos M1-M8 siguen funcionando
+☐ Caso Pudahuel ejecuta completo de forma autónoma
+☐ GET /pae/health retorna estado de todos los engines
+☐ Tests pasan sin ninguna llamada al Multi-Agent System
+☐ .env NO contiene PAE_MULTIAGENT_URL ni PAE_EXTERNAL_API_KEY
+
+═══════════════════════════════════════════════════════════════════════════
+
+--- FIN PROMPT I ---
+
+
+
+###########################################################################
+#                                                                         #
+#   RESUMEN: ONTOLOGÍA COMPARTIDA                                         #
+#   Referencia rápida de nodos y aristas comunes                          #
+#                                                                         #
+###########################################################################
+
+NODOS COMPARTIDOS (12) — Idénticos en DATAPOLIS y ÁGORA:
+─────────────────────────────────────────────────────────
+  1. permisos_edificacion      (DOM)
+  2. valor_suelo_m2            (SII)
+  3. densidad_poblacional      (INE)
+  4. cobertura_equipamiento    (MINVU)
+  5. indice_morosidad          (DATAPOLIS)
+  6. compliance_score          (DATAPOLIS)
+  7. gasto_comun_promedio      (DATAPOLIS)
+  8. tasa_vacancia             (DATAPOLIS)
+  9. indice_arriendo_m2        (DATAPOLIS)
+  10. carga_tributaria         (SII/DATAPOLIS)
+  11. antiguedad_edificacion   (DOM)
+  12. calidad_construccion     (MINVU)
+
+NODOS EXCLUSIVOS ÁGORA (8) — Solo en M11-AG:
+─────────────────────────────────────────────
+  13. indice_constructibilidad          (PRC)
+  14. coeficiente_ocupacion_suelo       (PRC)
+  15. superficie_areas_verdes           (MINVU)
+  16. indice_conectividad_transporte    (MTT/SECTRA)
+  17. indice_riesgo_ambiental           (MMA/DGA)
+  18. presion_demografica               (INE proyecciones)
+  19. indice_participacion_ciudadana    (ÁGORA M6)
+  20. cobertura_satelital_cambios       (ÁGORA M8/Sentinel-2)
+
+ARISTAS COMPARTIDAS (10):
+─────────────────────────
+  Fuente → Destino                              Ángulo  Peso   Lag    Conf.
+  permisos_edificacion → valor_suelo_m2          45°    0.72   12m    0.85
+  permisos_edificacion → densidad_poblacional    90°    0.65   24m    0.78
+  densidad_poblacional → cobertura_equipamiento  90°    0.58   36m    0.72
+  valor_suelo_m2 → indice_morosidad             180°   -0.45   18m    0.68
+  valor_suelo_m2 → indice_arriendo_m2            45°    0.78    6m    0.82
+  valor_suelo_m2 → gasto_comun_promedio          90°    0.42   12m    0.65
+  compliance_score → valor_suelo_m2              90°    0.35   18m    0.60
+  carga_tributaria → indice_morosidad            45°    0.55    6m    0.75
+  antiguedad_edificacion → gasto_comun_promedio  45°    0.48   12m    0.70
+  tasa_vacancia → valor_suelo_m2                180°   -0.52   12m    0.72
+
+ARISTAS EXCLUSIVAS ÁGORA (8):
+─────────────────────────────
+  permisos → indice_constructibilidad            45°    0.68    6m    0.80
+  densidad → presion_demografica                 90°    0.72   36m    0.75
+  densidad → superficie_areas_verdes            180°   -0.55   24m    0.70
+  conectividad_transporte → valor_suelo_m2       90°    0.78   18m    0.82
+  riesgo_ambiental → valor_suelo_m2             180°   -0.62   12m    0.76
+  presion_demografica → cobertura_equipamiento   90°   -0.58   36m    0.72
+  cobertura_satelital → permisos_edificacion     45°    0.40    3m    0.65
+  participacion_ciudadana → compliance_score     90°    0.32   24m    0.55
+
+EVENTOS CROSS-PLATFORM (Event Bus):
+────────────────────────────────────
+  DATAPOLIS → ÁGORA:
+    pae.datapolis.ontology.updated
+    pae.datapolis.alert.cross_platform
+    pae.datapolis.cluster_anomaly
+    pae.datapolis.valuation_shift
+    pae.datapolis.compliance_wave
+
+  ÁGORA → DATAPOLIS:
+    pae.agora.ontology.updated
+    pae.agora.alert.cross_platform
+    pae.agora.zone_transformation
+    pae.agora.infrastructure_impact
+    pae.agora.prc_pressure
+    pae.agora.environmental_alert
+
+  BIDIRECCIONAL:
+    pae.feedback.prediction_result
+    pae.ontology.merge_request
+
+═══════════════════════════════════════════════════════════════════════════
+FIN DEL DOCUMENTO
+═══════════════════════════════════════════════════════════════════════════

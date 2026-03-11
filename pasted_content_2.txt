@@ -1,0 +1,288 @@
+## Prompt final para CLAUDE y MANUS  
+**Solicitar implementación completa del estudio final DATAPOLIS v4.0 (técnico + negocio)**
+
+Copia y pega este prompt tal cual en CLAUDE o MANUS:
+
+---
+
+Quiero que actúes como **arquitecto de software senior + tech lead full‑stack + MLOps + DevOps + experto en econometría espacial, capital natural y ESG + estratega de negocio SaaS B2B/B2G**.
+
+Con base en lo ya definido para **DATAPOLIS v4.0 FINAL GLOBAL**, necesito que generes en **una sola respuesta** la **implementación completa del estudio final**, incluyendo:
+
+1. **Implementación técnica consolidada de DATAPOLIS v4.0**  
+2. **Diseño comercial y de negocio completo para el mercado chileno (y escalable a la región)**  
+
+No inventes nuevos objetivos: trabaja explícitamente sobre la visión ya definida de DATAPOLIS como **plataforma integrada PropTech + FinTech + RegTech + GovTech + ESG/Capital Natural**, que:
+
+- Mantiene el núcleo **DATAPOLIS v3.0** ya consolidado (M00–M22, GT‑PV, Open Finance NCG‑514, Basel IV, GIRES, ÁGORA, etc.).  
+- Añade en v4.0 una **capa ESG/Capital Natural avanzada**, con:
+  - Modelo de **precios hedónicos espaciales** (OLS, log‑lineal, double‑log, Box‑Cox, Moran, SAR/SEM).  
+  - **Valoración de servicios ecosistémicos** (value transfer, valor anual y NPV por tipo de ecosistema).  
+  - **Contabilidad de capital natural** (precios sombra, modelos bioeconómicos tipo Schaefer).  
+  - **Valuation Method Advisor** (elección de método: Income / Market / Asset / Hedónico / ML).  
+  - **Environmental Data Hub** (hub unificado de datos ambientales para alimentar hedónico, ecosistemas, capital natural, GIRES y ÁGORA).
+
+---
+
+## 1. Alcance de la salida que debes generar
+
+Necesito que tu respuesta entregue un **“paquete virtual” completo de DATAPOLIS v4.0**, listo para:
+
+- Ser reconstruido como repositorio.  
+- Ejecutar validaciones y tests.  
+- Generar un ZIP tipo `DATAPOLIS_v4_Full.zip`.  
+- Usarse comercialmente en Chile con sistema de pagos y estrategia de mercado.
+
+### 1.1. Estructura y formato obligatorio de la respuesta
+
+Debes responder **solo** en el siguiente formato, repetido archivo por archivo:
+
+```markdown
+filename: RUTA/DEL/ARCHIVO.ext
+```tipo
+# Contenido completo del archivo
+# ...
+```
+
+Reglas:
+
+- No uses “...” ni omitas partes críticas: entrega contenido funcional aunque sea simplificado.  
+- **Documentación y estrategia comercial en español.**  
+- **Código, configuración y nombres técnicos en inglés.**  
+- Entrega todos los archivos **nuevos o modificados** que hagan falta para que v4.0 esté completo.  
+- La respuesta debe ser **autosuficiente**: al copiar los archivos a un proyecto, se pueda reconstruir el sistema.  
+
+---
+
+## 2. Parte técnica – DATAPOLIS v4.0
+
+### 2.1. Metadatos y base del proyecto
+
+Genera, como mínimo, los siguientes archivos:
+
+1. `VERSION`  
+   - Texto plano con algo como:  
+     `DATAPOLIS v4.0.0 – 100% Complete – Production Ready – Hedonic & Natural Capital Edition`.
+
+2. `README.md`  
+   - Descripción general de DATAPOLIS v4.0.  
+   - Lista de módulos (v3.0 + v4.0).  
+   - Cómo instalar en local de forma resumida.  
+   - Referencia a `docs/`.
+
+### 2.2. Backend FastAPI (núcleo técnico v4.0)
+
+Asume que el núcleo v3.0 ya existe y funciona. Solo debes **añadir/ajustar** lo necesario para v4.0.
+
+Incluye:
+
+1. **Punto de entrada** (mostrando integración de los nuevos módulos):  
+   - `backend/fastapi/app/main.py`  
+     - Importa y registra routers para:
+       - `hedonic`  
+       - `ecosystem_services`  
+       - `natural_capital`  
+       - `valuation_advisor`  
+       - `env_hub`  
+
+2. **Servicios nuevos (código completo, aunque didáctico pero funcional):**
+
+   - `backend/fastapi/app/services/m_hedonic.py`  
+     - Función principal que:
+       - Recibe `features` y `price`.  
+       - Permite elegir modelo: lineal, log‑lineal, double‑log, Box‑Cox (puedes simplificar el Box‑Cox).  
+       - Entrena un modelo OLS (usando `statsmodels`).  
+       - Calcula: coeficientes, errores estándar, VIF, Moran’s I si se pasan pesos espaciales, y si hay autocorrelación, intenta un SAR/SEM simplificado.  
+       - Devuelve precios implícitos y elasticidades por atributo.
+
+   - `backend/fastapi/app/services/m_ecosystem_services.py`  
+     - Función que:
+       - Recibe un polígono (GeoJSON) y lista de tipos de ecosistemas.  
+       - Usa valores por hectárea por tipo (`bosque`, `humedal`, `parque`, `marino_costero`), tasa de descuento y horizonte.  
+       - Devuelve área en hectáreas, valor anual por tipo y NPV.  
+
+   - `backend/fastapi/app/services/m_natural_capital.py`  
+     - Función que:
+       - Recibe stock, tasa de crecimiento, depreciación y tasa de descuento.  
+       - Aplica un modelo bioeconómico tipo Schaefer simplificado.  
+       - Calcula flujo sostenible máximo y precio sombra (valor presente del flujo).  
+
+   - `backend/fastapi/app/services/m_valuation_advisor.py`  
+     - Motor de reglas que:
+       - Recibe propósito (inversión, impuesto, litigio, regulación), tipo de activo y calidad de datos.  
+       - Devuelve método recomendado (Income / Market / Asset / Hedonic / ML / NaturalCapital), explicación y endpoints sugeridos de DATAPOLIS.  
+
+   - `backend/fastapi/app/services/m_env_hub.py`  
+     - Servicio que:
+       - Expone una función para obtener capas ambientales (air_quality, water_quality, land_use) a partir de llamadas HTTP a APIs externas simuladas.  
+
+3. **Routers FastAPI (endpoints REST):**
+
+   - `backend/fastapi/app/routers/hedonic.py`  
+     - `POST /api/v1/hedonic/estimate`  
+
+   - `backend/fastapi/app/routers/ecosystem_services.py`  
+     - `POST /api/v1/ecosystem/value`  
+
+   - `backend/fastapi/app/routers/natural_capital.py`  
+     - `POST /api/v1/natural-capital/price`  
+
+   - `backend/fastapi/app/routers/valuation_advisor.py`  
+     - `POST /api/v1/valuation-advisor/recommend`  
+
+   - `backend/fastapi/app/routers/env_hub.py`  
+     - `GET /api/v1/env-hub/layers/{layer_name}?bbox=minx,miny,maxx,maxy`  
+
+4. **Schemas Pydantic:**
+
+   - `backend/fastapi/app/schemas/hedonic.py` – modelos de request/response.  
+   - `backend/fastapi/app/schemas/ecosystem_services.py`  
+   - `backend/fastapi/app/schemas/natural_capital.py`  
+   - `backend/fastapi/app/schemas/valuation_advisor.py`  
+   - `backend/fastapi/app/schemas/env_hub.py`  
+
+5. **OpenAPI actualizado:**
+
+   - `backend/fastapi/openapi.yaml`  
+     - Define tags:
+       - `HedonicPricing`, `EcosystemServices`, `NaturalCapital`, `ValuationAdvisor`, `EnvironmentalData`.  
+     - Paths para todos los endpoints nuevos.  
+
+6. **Dependencias:**
+
+   - `backend/fastapi/requirements.txt`  
+     - Incluye FastAPI, Pydantic, SQLAlchemy, Postgres, Redis, `statsmodels`, `pysal` (o similar para Moran), `numpy`, `pandas`, `geopandas`, `shapely`, `requests`.
+
+### 2.3. Backend Laravel (solo integración mínima v4.0)
+
+Asume Laravel v3.0 ya operativo. Solo muestra **lo nuevo o ajustado**:
+
+- `backend/laravel/routes/api.php`  
+  - Mantén rutas existentes y añade rutas de alto nivel para reportes ESG/capital natural si lo consideras útil (por ejemplo, `Route::get('esg-report/{type}', ...)`).
+
+### 2.4. Frontend Vue 3 – nuevas vistas v4.0
+
+Crea componentes Vue funcionales (aunque simples) para exponer:
+
+1. `frontend/src/views/HedonicPanel.vue`  
+   - Formulario para lanzar un modelo hedónico y mostrar el resultado JSON.
+
+2. `frontend/src/views/EcosystemDashboard.vue`  
+   - Mapa (Leaflet) con polígono y botón para calcular valor ecosistémico; muestra resultado.
+
+3. `frontend/src/views/ValuationAdvisor.vue`  
+   - Wizard simple (selects) que llama al advisor y muestra método recomendado.
+
+4. `frontend/src/router/index.js`  
+   - Rutas `/hedonic`, `/ecosystem`, `/advisor`.
+
+5. `frontend/src/services/api.js`  
+   - Funciones para llamar a los nuevos endpoints FastAPI.
+
+### 2.5. Tests y CI/CD
+
+1. **Tests unitarios y E2E (simplificados pero reales):**
+
+   - `tests/test_hedonic.py`  
+   - `tests/test_ecosystem_services.py`  
+   - `tests/test_natural_capital.py`  
+   - `tests/test_valuation_advisor.py`  
+   - `tests/test_e2e_v4.py` (puede contener un flujo de alto nivel con `pass` comentado si necesitas omitir detalles de v3.0, pero estructura coherente).
+
+2. **CI/CD:**
+
+   - `ci/.github/workflows/ci.yml`  
+     - Job de test (instalar deps, correr pytest, build frontend)  
+     - Paso de validación básica de `openapi.yaml`.  
+
+3. **Scripts:**
+
+   - `scripts/build_and_zip.sh`  
+     - Genera `DATAPOLIS_v4_Full.zip` incluyendo backend, frontend, docs, scripts, VERSION, README.  
+
+   - `scripts/validate_100_percent.sh`  
+     - Verifica presencia de archivos clave v3.0 + v4.0.  
+     - Ejecuta tests.  
+
+### 2.6. Documentación técnica
+
+En `docs/`:
+
+- `docs/ARCHITECTURE.md` – explica arquitectura v3.0 + nueva capa v4.0.  
+- `docs/API_REFERENCE.md` – describe al menos los nuevos endpoints y tags.  
+- `docs/DEPLOY_LOCAL.md` – pasos para despliegue local (Python, Node, Postgres, Redis).  
+- `docs/DEPLOY_CPANEL.md` – pasos para despliegue en cPanel compartido.  
+
+---
+
+## 3. Parte de negocio – Propuesta comercial completa (Chile)
+
+Toda esta parte debe estar en **español** y en formato de documentos Markdown dentro de `docs/`.
+
+### 3.1. Documentos clave
+
+1. `docs/DATAPOLIS_v4_INVERSIONISTAS.md`  
+   - Resumen ejecutivo.  
+   - Oportunidad de mercado (PropTech + FinTech + RegTech + ESG).  
+   - Modelo de ingresos SaaS (planes y APIs).  
+   - Proyección financiera resumida 2026–2028.  
+   - Estrategia de salida (exit) y retorno esperado.
+
+2. `docs/DATAPOLIS_v4_CLIENTES.md`  
+   - Explicación de flujos para usuarios (tasadores, inmobiliarias, bancos, municipios).  
+   - Cómo usar: módulos clave v4.0 (hedónico, ecosistemas, capital natural, advisor).  
+   - Casos de uso concretos.
+
+3. `docs/DATAPOLIS_v4_REGULADOR.md`  
+   - Enfoque en CMF, SII, Minvu, Municipios.  
+   - Cómo DATAPOLIS ayuda en NCG‑514, Basel IV, Ley 21.713, reporte ESG y capital natural.  
+
+4. `docs/CHECKLIST_100_PERCENT_v4.md`  
+   - Tabla de checklist marcando todos los ítems v3.0 + v4.0 como ✔.
+
+5. `docs/Commercial_Strategy.md`  
+   Debe incluir, como mínimo:
+
+   - Segmentos de mercado (individual, team profesional, empresa/sector público).  
+   - Planes y precios en formato orientativo (ejemplos):
+     - Individual: \${15}/mes, \${150}/año.  
+     - Team: \${50}/mes, \${500}/año.  
+     - Empresa: desde \${300}/mes, \${3 000}/año.  
+   - Sistema de pagos integrados:
+     - Transbank, MercadoPago, facturación electrónica SII.  
+   - Análisis competitivo:
+     - Tabla comparativa (plataformas actuales en Chile vs DATAPOLIS).  
+   - Matriz FODA completa.  
+   - Estrategia de posicionamiento:
+     - Mensaje clave, diferenciadores fuertes (hedónico espacial, capital natural, ESG regulatorio).  
+   - Estrategia de escalamiento de ventas:
+     - Top‑down (enterprise) y bottom‑up (self‑service).  
+   - Plan de financiamiento:
+     - Fondos tipo REALE (\$500 000 aprox., uso de fondos, % éxito 35–45 %).  
+     - Relación con inversión privada (ronda semilla/Serie A).  
+
+6. `docs/Gantt_2026_2028.md`  
+   - Tabla Gantt en Markdown para 2026, 2027 y 2028.  
+   - Actividades por trimestre (Q1–Q4), incluyendo:
+     - Estabilización técnica y despliegue v4.0.  
+     - Pilotos y primeros clientes.  
+     - Integraciones con SII y CMF.  
+     - Postulación y ejecución de fondos REALE.  
+     - Escalamiento nacional.  
+     - Preparación y entrada a 1–2 países de la región.  
+     - Lanzamiento de API marketplace / ecosistema de desarrolladores.
+
+---
+
+## 4. Reglas finales
+
+- La respuesta debe ser **una sola**, con todos los archivos listados en el formato indicado (`filename: ...` + bloque de código).  
+- No incluyas explicaciones fuera de los contenidos de los archivos.  
+- Es preferible un código/documentación **simple pero completo**, que un pseudocódigo incompleto.  
+- El resultado debe permitir, en principio:
+  1. Reconstruir el proyecto DATAPOLIS v4.0.  
+  2. Ejecutar los tests básicos.  
+  3. Generar `DATAPOLIS_v4_Full.zip`.  
+  4. Tener una propuesta comercial y estratégica lista para usar en Chile 2026–2028.
+
+Procede ahora a generar **todos los archivos** requeridos, en el formato especificado.

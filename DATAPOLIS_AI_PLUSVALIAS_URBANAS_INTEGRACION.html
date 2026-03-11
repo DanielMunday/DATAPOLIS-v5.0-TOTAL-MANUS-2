@@ -1,0 +1,2383 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DATAPOLIS AI | Módulo Plusvalías Urbanas | Integración Multi-Agente</title>
+    <style>
+        :root {
+            --primary: #1e40af;
+            --secondary: #0891b2;
+            --accent: #7c3aed;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --code-bg: #1e293b;
+        }
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background: #f1f5f9; color: #1e293b; line-height: 1.7; }
+        .container { max-width: 1500px; margin: 0 auto; padding: 25px; }
+        
+        .header {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 40%, #7c3aed 80%, #db2777 100%);
+            color: white;
+            padding: 50px 40px;
+            border-radius: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .header h1 { font-size: 2.5rem; margin-bottom: 15px; }
+        .header .subtitle { font-size: 1.2rem; opacity: 0.95; }
+        .header .badges { margin-top: 20px; display: flex; justify-content: center; gap: 15px; flex-wrap: wrap; }
+        .header .badge { background: rgba(255,255,255,0.2); padding: 8px 16px; border-radius: 20px; font-size: 0.85rem; }
+        
+        .section {
+            background: white;
+            padding: 35px;
+            border-radius: 16px;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+        }
+        .section h2 {
+            color: var(--primary);
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 3px solid var(--primary);
+            font-size: 1.6rem;
+        }
+        .section h3 { color: var(--secondary); margin: 25px 0 15px; font-size: 1.3rem; }
+        .section h4 { color: #475569; margin: 20px 0 12px; font-size: 1.1rem; }
+        
+        .toc {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border: 2px solid #3b82f6;
+            border-radius: 15px;
+            padding: 25px;
+            margin: 25px 0;
+        }
+        .toc h4 { color: #1e40af; margin-bottom: 15px; }
+        .toc ol { margin-left: 25px; }
+        .toc li { margin: 8px 0; }
+        .toc a { color: #1e40af; text-decoration: none; }
+        
+        .code-block {
+            background: var(--code-bg);
+            color: #e2e8f0;
+            padding: 20px;
+            border-radius: 12px;
+            font-family: 'Cascadia Code', 'Fira Code', monospace;
+            font-size: 0.85rem;
+            overflow-x: auto;
+            margin: 15px 0;
+            line-height: 1.5;
+            white-space: pre;
+        }
+        
+        .file-header {
+            background: linear-gradient(135deg, #334155, #475569);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 12px 12px 0 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+            display: flex;
+            justify-content: space-between;
+        }
+        .file-header + .code-block { border-radius: 0 0 12px 12px; margin-top: 0; }
+        .file-header .lang { background: rgba(255,255,255,0.2); padding: 3px 10px; border-radius: 10px; font-size: 0.8rem; }
+        
+        .diagram {
+            background: linear-gradient(135deg, #0f172a, #1e293b);
+            color: #e2e8f0;
+            padding: 25px;
+            border-radius: 15px;
+            font-family: 'Cascadia Code', monospace;
+            font-size: 10px;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.3;
+            margin: 25px 0;
+        }
+        
+        table { width: 100%; border-collapse: collapse; margin: 20px 0; font-size: 0.9rem; }
+        th { background: linear-gradient(135deg, var(--primary), #1e3a8a); color: white; padding: 14px 18px; text-align: left; }
+        td { padding: 14px 18px; border-bottom: 1px solid #e5e7eb; }
+        tr:hover { background: #f0f9ff; }
+        
+        .badge { display: inline-block; padding: 4px 12px; border-radius: 20px; font-size: 0.75rem; font-weight: 600; }
+        .badge-success { background: #dcfce7; color: #166534; }
+        .badge-warning { background: #fef3c7; color: #92400e; }
+        .badge-info { background: #e0f2fe; color: #0369a1; }
+        .badge-purple { background: #ede9fe; color: #5b21b6; }
+        .badge-danger { background: #fee2e2; color: #dc2626; }
+        
+        .alert { padding: 20px; border-radius: 12px; margin: 20px 0; }
+        .alert-info { background: #e0f2fe; border-left: 4px solid #0ea5e9; }
+        .alert-warning { background: #fef3c7; border-left: 4px solid #f59e0b; }
+        .alert-success { background: #dcfce7; border-left: 4px solid #22c55e; }
+        .alert-danger { background: #fee2e2; border-left: 4px solid #ef4444; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 25px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 20px; }
+        
+        .card { background: linear-gradient(135deg, #f8fafc, #f1f5f9); border: 2px solid #e2e8f0; border-radius: 12px; padding: 20px; }
+        .card h4 { color: var(--primary); margin-bottom: 12px; }
+        
+        .route-card {
+            border-radius: 16px;
+            padding: 25px;
+            color: white;
+            margin: 15px 0;
+        }
+        .route-1 { background: linear-gradient(135deg, #059669, #10b981); }
+        .route-2 { background: linear-gradient(135deg, #7c3aed, #8b5cf6); }
+        .route-3 { background: linear-gradient(135deg, #0891b2, #06b6d4); }
+        
+        .agent-card {
+            background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            margin: 15px 0;
+        }
+        .agent-card h4 { color: var(--accent); margin-bottom: 10px; display: flex; align-items: center; gap: 10px; }
+        .agent-card .icon { font-size: 1.5rem; }
+        
+        .flow-arrow {
+            text-align: center;
+            font-size: 2rem;
+            color: var(--primary);
+            margin: 10px 0;
+        }
+        
+        .entity-box {
+            background: linear-gradient(135deg, #eff6ff, #dbeafe);
+            border: 2px solid #3b82f6;
+            border-radius: 12px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .entity-box h5 { color: #1e40af; margin-bottom: 10px; }
+        
+        @media (max-width: 768px) {
+            .grid-2, .grid-3 { grid-template-columns: 1fr; }
+            .code-block, .diagram { font-size: 0.7rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- HEADER -->
+        <header class="header">
+            <h1>🏛️ DATAPOLIS AI + Módulo Plusvalías Urbanas</h1>
+            <p class="subtitle">Integración del Sistema Multi-Agente con Módulo de Plusvalías Urbanas</p>
+            <p style="margin-top: 10px; opacity: 0.9;">Caso de Uso: Municipio de Pudahuel (SECPLAC, DOM, Alcaldía, Jurídica)</p>
+            <div class="badges">
+                <span class="badge">Python 3.11+ / FastAPI</span>
+                <span class="badge">PostgreSQL + PostGIS</span>
+                <span class="badge">Ollama (LLM Local)</span>
+                <span class="badge">RLM Engine 1M+ tokens</span>
+                <span class="badge">ChromaDB RAG</span>
+            </div>
+        </header>
+        
+        <!-- TOC -->
+        <div class="toc">
+            <h4>📑 ÍNDICE DE CONTENIDOS</h4>
+            <ol>
+                <li><a href="#sintesis">Síntesis del Estado Actual</a></li>
+                <li><a href="#rutas">Definición de Rutas 1, 2 y 3</a></li>
+                <li><a href="#plusvalias">Diseño del Módulo de Plusvalías Urbanas</a></li>
+                <li><a href="#agentes">Integración con Sistema Multi-Agente</a></li>
+                <li><a href="#modelo-datos">Modelo de Datos Propuesto</a></li>
+                <li><a href="#pudahuel">Caso de Uso: Municipio de Pudahuel</a></li>
+                <li><a href="#implementacion">Plan de Implementación por Etapas</a></li>
+                <li><a href="#codigo">Código de Implementación</a></li>
+            </ol>
+        </div>
+        
+        <!-- SECCIÓN 1: SÍNTESIS DEL ESTADO ACTUAL -->
+        <section class="section" id="sintesis">
+            <h2>📋 1. SÍNTESIS DEL ESTADO ACTUAL</h2>
+            
+            <h3>1.1 Arquitectura del Sistema Multi-Agente DATAPOLIS AI</h3>
+            
+            <div class="alert alert-info">
+                <strong>📁 Fuente:</strong> Archivo <code>DATAPOLIS_MULTIAGENT_ECOSYSTEM_v2_tar.gz</code> extraído + Chat "Sistema Multi-Agente"
+            </div>
+            
+            <div class="diagram">
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                              DATAPOLIS MULTI-AGENT ECOSYSTEM v2.0 - ESTADO ACTUAL                               │
+├─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│  │                                     CAPA PRESENTACIÓN                                                    │   │
+│  │   ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐              │   │
+│  │   │  Frontend    │  │   Mobile     │  │  Telegram    │  │  WhatsApp    │  │   API        │              │   │
+│  │   │  Next.js 14  │  │   React      │  │    Bot       │  │   Business   │  │   Portal     │              │   │
+│  │   └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘              │   │
+│  │          └─────────────────┴────────────────┴────────────────┴───────────────────┘                       │   │
+│  └─────────────────────────────────────────────────────────────────────────────────────────────────────────┘   │
+│                                                    │                                                            │
+│                                            ┌───────▼───────┐                                                   │
+│                                            │  Nginx/Traefik │                                                   │
+│                                            │    Gateway     │                                                   │
+│                                            └───────┬───────┘                                                   │
+│                                                    │                                                            │
+│  ┌─────────────────────────────────────────────────▼─────────────────────────────────────────────────────────┐ │
+│  │                                    FASTAPI REST API (main_api.py - 51K)                                   │ │
+│  │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐               │ │
+│  │  │ /chatbot   │ │ /validador │ │ /buscador  │ │ /detector  │ │ /actas     │ │ /tributario│               │ │
+│  │  │   M01      │ │    M02     │ │    M03     │ │    M04     │ │   M05      │ │    M06     │               │ │
+│  │  └────────────┘ └────────────┘ └────────────┘ └────────────┘ └────────────┘ └────────────┘               │ │
+│  │  ┌────────────┐ ┌────────────┐ ┌────────────┐ ┌────────────┐                                              │ │
+│  │  │ /plusvalia │ │ /reservas  │ │/construc.  │ │/marketplace│ ← MÓDULOS ACTUALES (10)                     │ │
+│  │  │   M07 ⚠️   │ │    M08     │ │    M09     │ │    M10     │                                              │ │
+│  │  └────────────┘ └────────────┘ └────────────┘ └────────────┘                                              │ │
+│  └─────────────────────────────────────────────────────────────────────────────────────────────────────────┘   │
+│                                                    │                                                            │
+│  ┌─────────────────────────────────────────────────▼─────────────────────────────────────────────────────────┐ │
+│  │                                        CORE SYSTEMS                                                       │ │
+│  │   ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐                  │ │
+│  │   │   RLM Engine     │  │    Event Bus     │  │  Memory Manager  │  │   LLM Layer      │                  │ │
+│  │   │  1M+ tokens ✅   │  │   Pub/Sub ✅     │  │   5 niveles ✅   │  │  Ollama local ✅ │                  │ │
+│  │   │  (37K líneas)    │  │   (28K líneas)   │  │  (28K líneas)    │  │  Llama/Qwen/Mis  │                  │ │
+│  │   └──────────────────┘  └──────────────────┘  └──────────────────┘  └──────────────────┘                  │ │
+│  └─────────────────────────────────────────────────────────────────────────────────────────────────────────┘   │
+│                                                    │                                                            │
+│  ┌─────────────────────────────────────────────────▼─────────────────────────────────────────────────────────┐ │
+│  │                                         DATA LAYER                                                        │ │
+│  │   ┌──────────────────┐  ┌──────────────────┐  ┌──────────────────┐                                        │ │
+│  │   │   PostgreSQL     │  │      Redis       │  │    ChromaDB      │                                        │ │
+│  │   │   + PostGIS ✅   │  │    Cache ✅      │  │   Vectors ✅     │                                        │ │
+│  │   └──────────────────┘  └──────────────────┘  └──────────────────┘                                        │ │
+│  └─────────────────────────────────────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                                                 │
+│  ⚠️ M07 PLUSVALÍA ACTUAL: Solo devuelve datos mock, sin integración real con fuentes de datos municipales     │
+│                                                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+            </div>
+            
+            <h3>1.2 Estado del Módulo M07 Plusvalía (Actual)</h3>
+            
+            <div class="alert alert-warning">
+                <strong>⚠️ Estado Actual:</strong> El M07_PlusvaliaModule existente es una implementación <strong>mínima</strong> (30 líneas) que solo retorna datos mock. No tiene:
+                <ul style="margin: 10px 0 0 25px;">
+                    <li>Conexión a fuentes de datos reales (SII, Conservador, DOM)</li>
+                    <li>Modelos de predicción (Prophet/ARIMA)</li>
+                    <li>Integración con PostGIS para análisis espacial</li>
+                    <li>Cálculos de plusvalía según Ley 21.713</li>
+                    <li>Generación de reportes para unidades municipales</li>
+                </ul>
+            </div>
+            
+            <h3>1.3 Módulos del Ecosistema DATAPOLIS AI</h3>
+            
+            <table>
+                <tr>
+                    <th>Módulo</th>
+                    <th>Nombre</th>
+                    <th>Descripción</th>
+                    <th>Estado</th>
+                    <th>Líneas</th>
+                </tr>
+                <tr>
+                    <td><strong>M01</strong></td>
+                    <td>Chatbot Multicanal</td>
+                    <td>WhatsApp/Telegram con NLU</td>
+                    <td><span class="badge badge-success">Implementado</span></td>
+                    <td>~150</td>
+                </tr>
+                <tr>
+                    <td><strong>M02</strong></td>
+                    <td>Validador Liquidaciones</td>
+                    <td>OCR + Validación Ley 21.442</td>
+                    <td><span class="badge badge-success">Implementado</span></td>
+                    <td>~200</td>
+                </tr>
+                <tr>
+                    <td><strong>M03</strong></td>
+                    <td>Buscador Arriendos</td>
+                    <td>Búsqueda semántica + geoloc</td>
+                    <td><span class="badge badge-success">Implementado</span></td>
+                    <td>~150</td>
+                </tr>
+                <tr>
+                    <td><strong>M04</strong></td>
+                    <td>Detector Construcciones</td>
+                    <td>Sentinel-2 + cambios</td>
+                    <td><span class="badge badge-success">Implementado</span></td>
+                    <td>~180</td>
+                </tr>
+                <tr>
+                    <td><strong>M05</strong></td>
+                    <td>Generador Actas</td>
+                    <td>Whisper + LLM + DOCX</td>
+                    <td><span class="badge badge-success">Implementado</span></td>
+                    <td>~200</td>
+                </tr>
+                <tr>
+                    <td><strong>M06</strong></td>
+                    <td>Consultor Tributario</td>
+                    <td>RAG sobre normativa SII</td>
+                    <td><span class="badge badge-success">Implementado</span></td>
+                    <td>~120</td>
+                </tr>
+                <tr>
+                    <td><strong>M07</strong></td>
+                    <td>Mapa Plusvalía</td>
+                    <td>Análisis precios (mock)</td>
+                    <td><span class="badge badge-danger">⚠️ Mock</span></td>
+                    <td>~30</td>
+                </tr>
+                <tr>
+                    <td><strong>M08</strong></td>
+                    <td>Reservas Amenidades</td>
+                    <td>Booking espacios</td>
+                    <td><span class="badge badge-success">Implementado</span></td>
+                    <td>~80</td>
+                </tr>
+                <tr>
+                    <td><strong>M09</strong></td>
+                    <td>Constructibilidad</td>
+                    <td>Análisis PRC</td>
+                    <td><span class="badge badge-warning">Parcial</span></td>
+                    <td>~60</td>
+                </tr>
+                <tr>
+                    <td><strong>M10</strong></td>
+                    <td>Marketplace</td>
+                    <td>Proveedores</td>
+                    <td><span class="badge badge-success">Implementado</span></td>
+                    <td>~100</td>
+                </tr>
+                <tr style="background: #fef3c7;">
+                    <td><strong>M07-PU</strong></td>
+                    <td>Plusvalías Urbanas</td>
+                    <td>Módulo completo municipal</td>
+                    <td><span class="badge badge-purple">🎯 A Desarrollar</span></td>
+                    <td>~2,000+</td>
+                </tr>
+            </table>
+            
+            <h3>1.4 Componentes Core Implementados</h3>
+            
+            <div class="grid-3">
+                <div class="card">
+                    <h4>🧠 RLM Engine</h4>
+                    <p><strong>Estado:</strong> ✅ Completo (37K líneas)</p>
+                    <p>Motor de Lenguaje Recursivo para procesar contextos de +1M tokens basado en paper MIT CSAIL.</p>
+                    <ul style="margin: 10px 0 0 15px; font-size: 0.9rem;">
+                        <li>REPL Environment</li>
+                        <li>Chunking adaptativo</li>
+                        <li>Sub-llamadas recursivas</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>📡 Event Bus</h4>
+                    <p><strong>Estado:</strong> ✅ Completo (28K líneas)</p>
+                    <p>Sistema Pub/Sub para comunicación entre agentes y módulos.</p>
+                    <ul style="margin: 10px 0 0 15px; font-size: 0.9rem;">
+                        <li>Eventos tipados</li>
+                        <li>Handlers async</li>
+                        <li>Persistencia Redis</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>🗃️ Memory Manager</h4>
+                    <p><strong>Estado:</strong> ✅ Completo (28K líneas)</p>
+                    <p>Memoria jerárquica de 5 niveles para agentes.</p>
+                    <ul style="margin: 10px 0 0 15px; font-size: 0.9rem;">
+                        <li>Episódica</li>
+                        <li>Corto/Largo plazo</li>
+                        <li>Semántica/Procedimental</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <!-- SECCIÓN 2: DEFINICIÓN DE RUTAS -->
+        <section class="section" id="rutas">
+            <h2>🛤️ 2. DEFINICIÓN DE RUTAS 1, 2 y 3</h2>
+            
+            <div class="alert alert-info">
+                <strong>📌 Contexto:</strong> Las 3 rutas definidas en conversaciones anteriores se integran secuencialmente siguiendo un orden lógico de desarrollo de software.
+            </div>
+            
+            <div class="route-card route-1">
+                <h3>🛤️ RUTA 1: Consolidación Backend + Base de Datos</h3>
+                <p style="opacity: 0.95; margin: 15px 0;">Fundamentos técnicos y arquitectura de datos para soportar el ecosistema completo.</p>
+                
+                <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 12px; margin-top: 15px;">
+                    <h4 style="color: white; margin-bottom: 15px;">Objetivos Específicos:</h4>
+                    <ul style="margin-left: 20px; line-height: 2;">
+                        <li>✅ Migrar a SQLModel + Alembic para migraciones formales</li>
+                        <li>✅ Diseñar modelo de datos completo para Plusvalías Urbanas</li>
+                        <li>✅ Configurar PostgreSQL + PostGIS para análisis espacial</li>
+                        <li>✅ Implementar schemas Pydantic V2 estrictos</li>
+                        <li>✅ Testing con pytest (coverage 80%+)</li>
+                    </ul>
+                    
+                    <h4 style="color: white; margin: 20px 0 15px;">Entregables:</h4>
+                    <ul style="margin-left: 20px; line-height: 2;">
+                        <li>📦 Modelos SQLModel para 15+ entidades</li>
+                        <li>📦 Migraciones Alembic versionadas</li>
+                        <li>📦 Schemas Pydantic para validación</li>
+                        <li>📦 docker-compose.yml production-ready</li>
+                        <li>📦 Tests unitarios + integración</li>
+                    </ul>
+                    
+                    <p style="margin-top: 15px;"><strong>Tiempo estimado:</strong> 3-4 semanas</p>
+                </div>
+            </div>
+            
+            <div class="route-card route-2">
+                <h3>🛤️ RUTA 2: Módulo Plusvalías Urbanas + Agentes</h3>
+                <p style="opacity: 0.95; margin: 15px 0;">Desarrollo completo del módulo de análisis de plusvalías con integración multi-agente.</p>
+                
+                <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 12px; margin-top: 15px;">
+                    <h4 style="color: white; margin-bottom: 15px;">Objetivos Específicos:</h4>
+                    <ul style="margin-left: 20px; line-height: 2;">
+                        <li>✅ Implementar M07-PU Plusvalías Urbanas completo</li>
+                        <li>✅ Crear agentes especializados (Datos, Modelación, Regulatorio, Visualización)</li>
+                        <li>✅ Integrar con RLM Engine para análisis de documentos largos</li>
+                        <li>✅ Conectar fuentes de datos (SII, Conservador, DOM, IDE Chile)</li>
+                        <li>✅ Implementar modelos predictivos (Prophet, ARIMA, ML)</li>
+                    </ul>
+                    
+                    <h4 style="color: white; margin: 20px 0 15px;">Entregables:</h4>
+                    <ul style="margin-left: 20px; line-height: 2;">
+                        <li>📦 Servicio M07_PlusvaliaUrbana completo (~2,000 líneas)</li>
+                        <li>📦 Router FastAPI con 20+ endpoints</li>
+                        <li>📦 4 Agentes especializados integrados</li>
+                        <li>📦 Conectores a APIs externas</li>
+                        <li>📦 Modelos ML entrenados</li>
+                    </ul>
+                    
+                    <p style="margin-top: 15px;"><strong>Tiempo estimado:</strong> 4-6 semanas</p>
+                </div>
+            </div>
+            
+            <div class="route-card route-3">
+                <h3>🛤️ RUTA 3: Frontend + Caso Municipio Pudahuel</h3>
+                <p style="opacity: 0.95; margin: 15px 0;">Interfaz de usuario y despliegue para el caso de uso municipal.</p>
+                
+                <div style="background: rgba(255,255,255,0.15); padding: 20px; border-radius: 12px; margin-top: 15px;">
+                    <h4 style="color: white; margin-bottom: 15px;">Objetivos Específicos:</h4>
+                    <ul style="margin-left: 20px; line-height: 2;">
+                        <li>✅ Dashboard ejecutivo para Alcaldía</li>
+                        <li>✅ Panel SECPLAC con mapas temáticos</li>
+                        <li>✅ Visor DOM para análisis de permisos</li>
+                        <li>✅ Reportes Jurídica sobre conflictos</li>
+                        <li>✅ API de integración con sistemas municipales</li>
+                    </ul>
+                    
+                    <h4 style="color: white; margin: 20px 0 15px;">Entregables:</h4>
+                    <ul style="margin-left: 20px; line-height: 2;">
+                        <li>📦 Frontend Next.js + TypeScript</li>
+                        <li>📦 Mapas interactivos (Leaflet/MapLibre)</li>
+                        <li>📦 Dashboards por unidad municipal</li>
+                        <li>📦 Documentación de uso</li>
+                        <li>📦 Deploy en servidor municipal</li>
+                    </ul>
+                    
+                    <p style="margin-top: 15px;"><strong>Tiempo estimado:</strong> 4-5 semanas</p>
+                </div>
+            </div>
+            
+            <h3>2.1 Conexión entre Rutas y Sistema Multi-Agente</h3>
+            
+            <div class="diagram">
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                    INTEGRACIÓN RUTAS 1-2-3 + MULTI-AGENTE                                       │
+├─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                                 │
+│    ┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐     │
+│    │                                         RUTA 1: BACKEND                                             │     │
+│    │    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                    │     │
+│    │    │   SQLModel   │───►│   Alembic    │───►│   PostGIS    │───►│   Testing    │                    │     │
+│    │    │   Modelos    │    │  Migraciones │    │   Espacial   │    │   pytest     │                    │     │
+│    │    └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘                    │     │
+│    └───────────────────────────────────────────────────┬─────────────────────────────────────────────────┘     │
+│                                                        │                                                        │
+│                                                        ▼                                                        │
+│    ┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐     │
+│    │                                     RUTA 2: PLUSVALÍAS + AGENTES                                    │     │
+│    │    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                    │     │
+│    │    │  M07-PU      │───►│   AGENTES    │───►│   RLM        │───►│   ML/AI      │                    │     │
+│    │    │  Servicio    │    │  4 tipos     │    │   Engine     │    │  Predicción  │                    │     │
+│    │    └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘                    │     │
+│    │           │                   │                   │                   │                             │     │
+│    │           ▼                   ▼                   ▼                   ▼                             │     │
+│    │    ┌─────────────────────────────────────────────────────────────────────────────────────────┐     │     │
+│    │    │                        EVENT BUS (Comunicación Inter-Agente)                            │     │     │
+│    │    │   plusvalia.calculada │ datos.actualizados │ prediccion.lista │ reporte.generado       │     │     │
+│    │    └─────────────────────────────────────────────────────────────────────────────────────────┘     │     │
+│    └───────────────────────────────────────────────────┬─────────────────────────────────────────────────┘     │
+│                                                        │                                                        │
+│                                                        ▼                                                        │
+│    ┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐     │
+│    │                                   RUTA 3: FRONTEND + PUDAHUEL                                       │     │
+│    │    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐    ┌──────────────┐                    │     │
+│    │    │  Dashboard   │───►│   Mapas      │───►│  Reportes    │───►│   Deploy     │                    │     │
+│    │    │  Alcaldía    │    │  SECPLAC     │    │  Jurídica    │    │  Municipal   │                    │     │
+│    │    └──────────────┘    └──────────────┘    └──────────────┘    └──────────────┘                    │     │
+│    └─────────────────────────────────────────────────────────────────────────────────────────────────────┘     │
+│                                                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+            </div>
+        </section>
+        
+        <!-- SECCIÓN 3: DISEÑO DEL MÓDULO PLUSVALÍAS URBANAS -->
+        <section class="section" id="plusvalias">
+            <h2>📈 3. DISEÑO DEL MÓDULO DE PLUSVALÍAS URBANAS (M07-PU)</h2>
+            
+            <h3>3.1 Propósito Detallado</h3>
+            
+            <div class="alert alert-success">
+                <strong>🎯 Objetivo Principal:</strong> Proporcionar una herramienta integral de monitoreo, análisis y prospectiva territorial para el Municipio de Pudahuel, integrando información pública y privada para apoyar la toma de decisiones sobre consolidación urbana, inversiones y normativa.
+            </div>
+            
+            <div class="grid-2">
+                <div class="card">
+                    <h4>📊 Funciones de Análisis</h4>
+                    <ul style="margin: 10px 0 0 15px; line-height: 2;">
+                        <li><strong>Cálculo de Plusvalía:</strong> Según Ley 21.713</li>
+                        <li><strong>Valorización de Suelo:</strong> UF/m² por zona</li>
+                        <li><strong>Tendencias Históricas:</strong> Series temporales 10 años</li>
+                        <li><strong>Predicción:</strong> Proyecciones 1-5 años (Prophet/ARIMA)</li>
+                        <li><strong>Análisis Comparativo:</strong> Benchmarking comunal</li>
+                    </ul>
+                </div>
+                <div class="card">
+                    <h4>🗺️ Funciones Espaciales</h4>
+                    <ul style="margin: 10px 0 0 15px; line-height: 2;">
+                        <li><strong>Mapas Temáticos:</strong> Heatmaps de valor</li>
+                        <li><strong>Zonas de Influencia:</strong> Buffer analysis</li>
+                        <li><strong>Detección de Cambios:</strong> Sentinel-2</li>
+                        <li><strong>Análisis de Proximidad:</strong> Servicios, transporte</li>
+                        <li><strong>Zonificación:</strong> PRC y usos de suelo</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h3>3.2 Entradas de Datos (Inputs)</h3>
+            
+            <table>
+                <tr>
+                    <th>Fuente</th>
+                    <th>Tipo de Datos</th>
+                    <th>Frecuencia</th>
+                    <th>Método Acceso</th>
+                </tr>
+                <tr>
+                    <td><strong>SII</strong></td>
+                    <td>Avalúos fiscales, transacciones, roles</td>
+                    <td>Semestral</td>
+                    <td>API / Scraping</td>
+                </tr>
+                <tr>
+                    <td><strong>Conservador Bienes Raíces</strong></td>
+                    <td>Inscripciones, hipotecas, prohibiciones</td>
+                    <td>Diaria</td>
+                    <td>API / Manual</td>
+                </tr>
+                <tr>
+                    <td><strong>DOM Municipal</strong></td>
+                    <td>Permisos edificación, recepciones</td>
+                    <td>Mensual</td>
+                    <td>Integración directa</td>
+                </tr>
+                <tr>
+                    <td><strong>IDE Chile</strong></td>
+                    <td>Catastro, límites, equipamiento</td>
+                    <td>Anual</td>
+                    <td>WFS/WMS</td>
+                </tr>
+                <tr>
+                    <td><strong>Portales Inmobiliarios</strong></td>
+                    <td>Precios oferta, arriendos</td>
+                    <td>Semanal</td>
+                    <td>Scraping</td>
+                </tr>
+                <tr>
+                    <td><strong>Sentinel-2</strong></td>
+                    <td>Imágenes satelitales</td>
+                    <td>5 días</td>
+                    <td>Copernicus API</td>
+                </tr>
+                <tr>
+                    <td><strong>INE/Censo</strong></td>
+                    <td>Datos socioeconómicos</td>
+                    <td>Decenal</td>
+                    <td>CSV/API</td>
+                </tr>
+                <tr>
+                    <td><strong>MINVU</strong></td>
+                    <td>Proyectos habitacionales, subsidios</td>
+                    <td>Trimestral</td>
+                    <td>API / Manual</td>
+                </tr>
+            </table>
+            
+            <h3>3.3 Salidas (Outputs)</h3>
+            
+            <div class="grid-3">
+                <div class="entity-box">
+                    <h5>📊 Indicadores</h5>
+                    <ul style="margin: 10px 0 0 15px; font-size: 0.9rem; line-height: 1.8;">
+                        <li>Plusvalía % (anual, acumulada)</li>
+                        <li>UF/m² por manzana</li>
+                        <li>Índice de consolidación</li>
+                        <li>Ratio inversión/valor</li>
+                        <li>Score de riesgo</li>
+                    </ul>
+                </div>
+                <div class="entity-box">
+                    <h5>🗺️ Mapas Temáticos</h5>
+                    <ul style="margin: 10px 0 0 15px; font-size: 0.9rem; line-height: 1.8;">
+                        <li>Heatmap de valores</li>
+                        <li>Zonas de crecimiento</li>
+                        <li>Áreas de inversión</li>
+                        <li>Conflictos normativos</li>
+                        <li>Proyecciones espaciales</li>
+                    </ul>
+                </div>
+                <div class="entity-box">
+                    <h5>📑 Reportes</h5>
+                    <ul style="margin: 10px 0 0 15px; font-size: 0.9rem; line-height: 1.8;">
+                        <li>Informe SECPLAC mensual</li>
+                        <li>Alertas DOM permisos</li>
+                        <li>Dashboard Alcaldía</li>
+                        <li>Análisis Jurídica</li>
+                        <li>Exportables PDF/Excel</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h3>3.4 Interacción con Otros Módulos</h3>
+            
+            <div class="diagram">
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                              INTERACCIONES DEL MÓDULO PLUSVALÍAS URBANAS (M07-PU)                               │
+├─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                                 │
+│                                    ┌─────────────────────────────┐                                              │
+│                                    │      M07-PU PLUSVALÍAS      │                                              │
+│                                    │         URBANAS             │                                              │
+│                                    │   ┌───────────────────┐     │                                              │
+│                                    │   │ • Cálculo plusvalía│     │                                              │
+│                                    │   │ • Predicción ML    │     │                                              │
+│                                    │   │ • Análisis espacial│     │                                              │
+│                                    │   │ • Reportes         │     │                                              │
+│                                    │   └───────────────────┘     │                                              │
+│                                    └──────────┬──────────────────┘                                              │
+│                                               │                                                                  │
+│         ┌─────────────────┬──────────────────┼──────────────────┬─────────────────┐                            │
+│         │                 │                  │                  │                 │                            │
+│         ▼                 ▼                  ▼                  ▼                 ▼                            │
+│  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐  ┌──────────────┐                      │
+│  │     M04      │  │     M06      │  │     M09      │  │  DATAPOLIS   │  │    ÁGORA     │                      │
+│  │  Detector    │  │  Tributario  │  │Constructib.  │  │   v3.0       │  │   GeoIA      │                      │
+│  │Construcciones│  │   RAG SII    │  │    PRC       │  │  23 módulos  │  │   v4.0       │                      │
+│  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘  └──────┬───────┘                      │
+│         │                 │                  │                  │                 │                            │
+│         │                 │                  │                  │                 │                            │
+│         ▼                 ▼                  ▼                  ▼                 ▼                            │
+│  ┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐      │
+│  │                                        EVENT BUS                                                    │      │
+│  │  ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐ ┌─────────────┐   │      │
+│  │  │construccion │ │consulta.    │ │normativa.   │ │valoracion.  │ │prediccion.  │ │reporte.     │   │      │
+│  │  │.detectada   │ │tributaria   │ │actualizada  │ │calculada    │ │generada     │ │listo        │   │      │
+│  │  └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘ └─────────────┘   │      │
+│  └─────────────────────────────────────────────────────────────────────────────────────────────────────┘      │
+│                                                                                                                 │
+│  FLUJOS DE DATOS:                                                                                              │
+│  ────────────────                                                                                              │
+│  M04 → M07-PU: Alertas de nuevas construcciones para recalcular plusvalía de zona afectada                    │
+│  M06 → M07-PU: Información tributaria para cálculos de impuesto plusvalía (Ley 21.713)                        │
+│  M09 → M07-PU: Potencial constructibilidad afecta valorización futura de predios                              │
+│  DATAPOLIS → M07-PU: Credit Score y valorización IVS 2022 de propiedades                                       │
+│  ÁGORA → M07-PU: Análisis de riesgos naturales y scores territoriales                                          │
+│                                                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+            </div>
+        </section>
+        
+        <!-- SECCIÓN 4: INTEGRACIÓN CON SISTEMA MULTI-AGENTE -->
+        <section class="section" id="agentes">
+            <h2>🤖 4. INTEGRACIÓN CON SISTEMA MULTI-AGENTE (DATAPOLIS AI)</h2>
+            
+            <h3>4.1 Agentes Especializados para Plusvalías Urbanas</h3>
+            
+            <div class="grid-2">
+                <div class="agent-card">
+                    <h4><span class="icon">📊</span> Agente de Datos (DataAgent)</h4>
+                    <p><strong>Rol:</strong> Recolección, validación y normalización de datos de múltiples fuentes.</p>
+                    <p><strong>Responsabilidades:</strong></p>
+                    <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
+                        <li>Conectar con APIs externas (SII, CBR, IDE Chile)</li>
+                        <li>Ejecutar scrapers de portales inmobiliarios</li>
+                        <li>Validar integridad y consistencia de datos</li>
+                        <li>Detectar anomalías y datos faltantes</li>
+                        <li>Emitir eventos <code>datos.actualizados</code></li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>Herramientas:</strong> Scrapy, Pandas, Great Expectations</p>
+                </div>
+                
+                <div class="agent-card">
+                    <h4><span class="icon">🧮</span> Agente de Modelación (ModelAgent)</h4>
+                    <p><strong>Rol:</strong> Ejecución de modelos matemáticos y predictivos.</p>
+                    <p><strong>Responsabilidades:</strong></p>
+                    <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
+                        <li>Calcular plusvalía según fórmulas Ley 21.713</li>
+                        <li>Ejecutar modelos Prophet/ARIMA para proyecciones</li>
+                        <li>Entrenar modelos ML de valorización</li>
+                        <li>Generar scores de consolidación urbana</li>
+                        <li>Emitir eventos <code>prediccion.lista</code></li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>Herramientas:</strong> Prophet, Scikit-learn, XGBoost, SHAP</p>
+                </div>
+                
+                <div class="agent-card">
+                    <h4><span class="icon">⚖️</span> Agente Regulatorio (RegulatoryAgent)</h4>
+                    <p><strong>Rol:</strong> Análisis de normativa urbanística y cumplimiento legal.</p>
+                    <p><strong>Responsabilidades:</strong></p>
+                    <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
+                        <li>Consultar RAG sobre Ley 21.713, LGUC, OGUC</li>
+                        <li>Validar cumplimiento de PRC Pudahuel</li>
+                        <li>Detectar conflictos normativos en predios</li>
+                        <li>Generar alertas para Asesoría Jurídica</li>
+                        <li>Emitir eventos <code>normativa.alerta</code></li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>Herramientas:</strong> ChromaDB RAG, RLM Engine, LangChain</p>
+                </div>
+                
+                <div class="agent-card">
+                    <h4><span class="icon">🗺️</span> Agente de Visualización (VisualizationAgent)</h4>
+                    <p><strong>Rol:</strong> Generación de mapas, gráficos y reportes visuales.</p>
+                    <p><strong>Responsabilidades:</strong></p>
+                    <ul style="margin: 10px 0 0 20px; line-height: 1.8;">
+                        <li>Renderizar mapas temáticos con PostGIS</li>
+                        <li>Generar heatmaps de valorización</li>
+                        <li>Crear dashboards interactivos</li>
+                        <li>Exportar reportes PDF/Excel</li>
+                        <li>Emitir eventos <code>reporte.generado</code></li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>Herramientas:</strong> Plotly, Folium, python-docx, ReportLab</p>
+                </div>
+            </div>
+            
+            <h3>4.2 Flujo de Información entre Agentes</h3>
+            
+            <div class="diagram">
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                              FLUJO DE INFORMACIÓN ENTRE AGENTES M07-PU                                          │
+├─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                                 │
+│   SOLICITUD USUARIO                                                                                             │
+│   "Calcular plusvalía de Pudahuel sector Lo Prado 2020-2025 y proyectar a 2027"                                │
+│          │                                                                                                      │
+│          ▼                                                                                                      │
+│   ┌──────────────────────────────────────────────────────────────────────────────────────────────────────┐     │
+│   │                               ORQUESTADOR (RLM Engine)                                               │     │
+│   │   • Descompone la solicitud en subtareas                                                             │     │
+│   │   • Asigna agentes según competencias                                                                │     │
+│   │   • Coordina ejecución paralela/secuencial                                                           │     │
+│   └──────────────────────────────────────────────────────────────────────────────────────────────────────┘     │
+│          │                                                                                                      │
+│          ├─────────────────────────────────────────────────────────────────────┐                               │
+│          │                                                                     │                               │
+│          ▼                                                                     ▼                               │
+│   ┌──────────────────────────┐                                    ┌──────────────────────────┐                │
+│   │  PASO 1: DataAgent       │                                    │  PASO 1b: RegulatoryAgent│                │
+│   │  ────────────────────    │                                    │  ─────────────────────── │                │
+│   │  • Obtener transacciones │                                    │  • Consultar PRC Pudahuel│                │
+│   │    SII 2020-2025         │                                    │  • Verificar zonas       │                │
+│   │  • Scraping portales     │                                    │  • Detectar restricciones│                │
+│   │  • Validar datos         │                                    │                          │                │
+│   └────────────┬─────────────┘                                    └────────────┬─────────────┘                │
+│                │                                                               │                               │
+│                │  Event: datos.actualizados                                    │  Event: normativa.validada    │
+│                │                                                               │                               │
+│                └───────────────────────────┬───────────────────────────────────┘                               │
+│                                            │                                                                    │
+│                                            ▼                                                                    │
+│                              ┌──────────────────────────┐                                                      │
+│                              │  PASO 2: ModelAgent      │                                                      │
+│                              │  ────────────────────    │                                                      │
+│                              │  • Calcular plusvalía    │                                                      │
+│                              │    histórica (Ley 21.713)│                                                      │
+│                              │  • Entrenar Prophet      │                                                      │
+│                              │  • Proyectar a 2027      │                                                      │
+│                              │  • Generar intervalos    │                                                      │
+│                              │    de confianza          │                                                      │
+│                              └────────────┬─────────────┘                                                      │
+│                                           │                                                                     │
+│                                           │  Event: prediccion.lista                                            │
+│                                           │                                                                     │
+│                                           ▼                                                                     │
+│                              ┌──────────────────────────┐                                                      │
+│                              │ PASO 3: VisualizationAgent│                                                      │
+│                              │  ─────────────────────── │                                                      │
+│                              │  • Generar mapa heatmap  │                                                      │
+│                              │  • Crear gráfico serie   │                                                      │
+│                              │    temporal              │                                                      │
+│                              │  • Generar reporte PDF   │                                                      │
+│                              │    para SECPLAC          │                                                      │
+│                              └────────────┬─────────────┘                                                      │
+│                                           │                                                                     │
+│                                           │  Event: reporte.generado                                            │
+│                                           │                                                                     │
+│                                           ▼                                                                     │
+│   ┌──────────────────────────────────────────────────────────────────────────────────────────────────────┐     │
+│   │                                    RESPUESTA AL USUARIO                                              │     │
+│   │   {                                                                                                  │     │
+│   │     "plusvalia_2020_2025": {"porcentaje": 45.2, "uf_m2_inicial": 15.3, "uf_m2_final": 22.2},        │     │
+│   │     "proyeccion_2027": {"valor_esperado": 26.1, "intervalo_95": [23.5, 28.7]},                      │     │
+│   │     "mapa_url": "/api/v1/mapas/plusvalia/pudahuel-2025",                                            │     │
+│   │     "reporte_pdf": "/api/v1/reportes/plusvalia/pudahuel-2025.pdf"                                   │     │
+│   │   }                                                                                                  │     │
+│   └──────────────────────────────────────────────────────────────────────────────────────────────────────┘     │
+│                                                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+            </div>
+            
+            <h3>4.3 Arquitectura Lógica Integrada</h3>
+            
+            <div class="diagram">
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                          ARQUITECTURA LÓGICA M07-PU DENTRO DE DATAPOLIS AI                                      │
+├─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                                 │
+│  ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│  │                                    CAPA DE PRESENTACIÓN                                                  │   │
+│  │   ┌────────────────┐  ┌────────────────┐  ┌────────────────┐  ┌────────────────┐                        │   │
+│  │   │  Dashboard     │  │  Panel         │  │  Visor         │  │  Reportes      │                        │   │
+│  │   │  Alcaldía      │  │  SECPLAC       │  │  DOM           │  │  Jurídica      │                        │   │
+│  │   │  (ejecutivo)   │  │  (mapas)       │  │  (permisos)    │  │  (conflictos)  │                        │   │
+│  │   └────────┬───────┘  └────────┬───────┘  └────────┬───────┘  └────────┬───────┘                        │   │
+│  │            └──────────────────┬┴────────────────────┴──────────────────┘                                 │   │
+│  └───────────────────────────────┼──────────────────────────────────────────────────────────────────────────┘   │
+│                                  │                                                                              │
+│                                  ▼                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│  │                                    FASTAPI REST API                                                      │   │
+│  │   /api/v1/plusvalia/                                                                                    │   │
+│  │   ├── /calcular          POST   # Calcular plusvalía de zona/predio                                     │   │
+│  │   ├── /proyectar         POST   # Proyección temporal con ML                                            │   │
+│  │   ├── /mapa/{zona_id}    GET    # Obtener mapa temático                                                 │   │
+│  │   ├── /indicadores       GET    # KPIs consolidados                                                     │   │
+│  │   ├── /reporte           POST   # Generar reporte PDF/Excel                                             │   │
+│  │   ├── /alertas           GET    # Alertas de cambios significativos                                     │   │
+│  │   ├── /historico         GET    # Series temporales históricas                                          │   │
+│  │   └── /comparativa       GET    # Benchmarking inter-comunal                                            │   │
+│  └─────────────────────────────────────────────────────────────────────────────────────────────────────────┘   │
+│                                  │                                                                              │
+│                                  ▼                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│  │                              CAPA DE AGENTES (M07_PlusvaliaUrbanaModule)                                 │   │
+│  │                                                                                                         │   │
+│  │   ┌───────────────┐    ┌───────────────┐    ┌───────────────┐    ┌───────────────┐                      │   │
+│  │   │  DataAgent    │    │  ModelAgent   │    │ Regulatory    │    │ Visualization │                      │   │
+│  │   │  ───────────  │    │  ───────────  │    │    Agent      │    │    Agent      │                      │   │
+│  │   │ • SII API     │    │ • Prophet     │    │ ───────────── │    │ ───────────── │                      │   │
+│  │   │ • CBR API     │    │ • XGBoost     │    │ • RAG LGUC    │    │ • Plotly      │                      │   │
+│  │   │ • Scrapers    │    │ • ARIMA       │    │ • RAG OGUC    │    │ • Folium      │                      │   │
+│  │   │ • Validators  │    │ • Plusvalía   │    │ • PRC Parser  │    │ • ReportLab   │                      │   │
+│  │   └───────┬───────┘    └───────┬───────┘    └───────┬───────┘    └───────┬───────┘                      │   │
+│  │           │                    │                    │                    │                               │   │
+│  │           └────────────────────┼────────────────────┼────────────────────┘                               │   │
+│  │                                │                    │                                                    │   │
+│  │                                ▼                    ▼                                                    │   │
+│  │   ┌──────────────────────────────────────────────────────────────────────────────────────────────────┐  │   │
+│  │   │                           EVENT BUS (Redis Pub/Sub)                                              │  │   │
+│  │   │   datos.actualizados | prediccion.lista | normativa.alerta | reporte.generado | alerta.plusvalia │  │   │
+│  │   └──────────────────────────────────────────────────────────────────────────────────────────────────┘  │   │
+│  └─────────────────────────────────────────────────────────────────────────────────────────────────────────┘   │
+│                                  │                                                                              │
+│                                  ▼                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│  │                                    CAPA CORE                                                             │   │
+│  │   ┌───────────────────┐  ┌───────────────────┐  ┌───────────────────┐                                   │   │
+│  │   │    RLM Engine     │  │   Memory Manager  │  │    LLM Layer      │                                   │   │
+│  │   │   1M+ tokens      │  │   5 niveles       │  │   Ollama local    │                                   │   │
+│  │   └───────────────────┘  └───────────────────┘  └───────────────────┘                                   │   │
+│  └─────────────────────────────────────────────────────────────────────────────────────────────────────────┘   │
+│                                  │                                                                              │
+│                                  ▼                                                                              │
+│  ┌─────────────────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│  │                                    CAPA DE DATOS                                                         │   │
+│  │   ┌───────────────────┐  ┌───────────────────┐  ┌───────────────────┐                                   │   │
+│  │   │   PostgreSQL      │  │      Redis        │  │    ChromaDB       │                                   │   │
+│  │   │   + PostGIS       │  │     Cache         │  │   Embeddings      │                                   │   │
+│  │   │ (datos espaciales)│  │ (sesiones,eventos)│  │ (RAG normativa)   │                                   │   │
+│  │   └───────────────────┘  └───────────────────┘  └───────────────────┘                                   │   │
+│  └─────────────────────────────────────────────────────────────────────────────────────────────────────────┘   │
+│                                                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+            </div>
+        </section>
+        
+        <!-- SECCIÓN 5: MODELO DE DATOS -->
+        <section class="section" id="modelo-datos">
+            <h2>🗃️ 5. MODELO DE DATOS PROPUESTO</h2>
+            
+            <div class="alert alert-info">
+                <strong>📌 Verificación:</strong> No se encontró diseño previo de BD en el historial. Se propone modelo inicial híbrido (relacional + geoespacial).
+            </div>
+            
+            <h3>5.1 Tipo de Base de Datos Recomendada</h3>
+            
+            <div class="grid-3">
+                <div class="card" style="border-color: #22c55e; border-width: 3px;">
+                    <h4 style="color: #22c55e;">✅ Opción Recomendada</h4>
+                    <p><strong>PostgreSQL + PostGIS</strong></p>
+                    <ul style="margin: 10px 0 0 15px; font-size: 0.9rem; line-height: 1.8;">
+                        <li>Soporte nativo geoespacial</li>
+                        <li>ACID compliance</li>
+                        <li>Extensiones ML (pg_ml)</li>
+                        <li>Integración con QGIS</li>
+                        <li>Open source, maduro</li>
+                    </ul>
+                    <p style="margin-top: 10px; color: #22c55e;"><strong>Para DATAPOLIS AI: Ideal</strong></p>
+                </div>
+                <div class="card">
+                    <h4>⚡ Opción Alternativa A</h4>
+                    <p><strong>MongoDB + GeoJSON</strong></p>
+                    <ul style="margin: 10px 0 0 15px; font-size: 0.9rem; line-height: 1.8;">
+                        <li>Flexibilidad esquema</li>
+                        <li>Índices geoespaciales</li>
+                        <li>Escalabilidad horizontal</li>
+                        <li>Bueno para documentos</li>
+                    </ul>
+                    <p style="margin-top: 10px; color: #d97706;"><strong>Desventaja:</strong> Menos potente para análisis espacial complejo</p>
+                </div>
+                <div class="card">
+                    <h4>🔄 Opción Alternativa B</h4>
+                    <p><strong>Híbrido: PostgreSQL + TimescaleDB</strong></p>
+                    <ul style="margin: 10px 0 0 15px; font-size: 0.9rem; line-height: 1.8;">
+                        <li>Series temporales optimizadas</li>
+                        <li>Compresión nativa</li>
+                        <li>Agregaciones rápidas</li>
+                        <li>Compatible PostGIS</li>
+                    </ul>
+                    <p style="margin-top: 10px; color: #0891b2;"><strong>Para:</strong> Si el volumen de datos históricos es muy alto</p>
+                </div>
+            </div>
+            
+            <h3>5.2 Entidades Principales</h3>
+            
+            <div class="file-header">
+                <span>📁 models/plusvalia_urbana.py</span>
+                <span class="lang">Python / SQLModel</span>
+            </div>
+            <div class="code-block">
+"""
+================================================================================
+MODELOS DE DATOS - MÓDULO PLUSVALÍAS URBANAS (M07-PU)
+================================================================================
+Base de datos: PostgreSQL + PostGIS
+ORM: SQLModel (SQLAlchemy + Pydantic)
+"""
+
+from sqlmodel import SQLModel, Field, Relationship
+from typing import Optional, List
+from datetime import datetime, date
+from decimal import Decimal
+from geoalchemy2 import Geometry
+from sqlalchemy import Column, Index
+import uuid
+
+
+# =============================================================================
+# ENTIDADES GEOGRÁFICAS
+# =============================================================================
+
+class Comuna(SQLModel, table=True):
+    """Comuna/Municipio"""
+    __tablename__ = "comunas"
+    
+    id: int = Field(default=None, primary_key=True)
+    codigo_ine: str = Field(max_length=5, unique=True, index=True)  # Ej: "13119" (Pudahuel)
+    nombre: str = Field(max_length=100)
+    region_id: int = Field(foreign_key="regiones.id")
+    superficie_km2: Decimal = Field(default=0, decimal_places=2)
+    poblacion: int = Field(default=0)
+    
+    # Geometría (PostGIS)
+    geometry: Optional[str] = Field(sa_column=Column(Geometry("MULTIPOLYGON", srid=4326)))
+    
+    # Relaciones
+    manzanas: List["Manzana"] = Relationship(back_populates="comuna")
+    predios: List["Predio"] = Relationship(back_populates="comuna")
+
+
+class Manzana(SQLModel, table=True):
+    """Manzana censal (unidad mínima de análisis)"""
+    __tablename__ = "manzanas"
+    
+    id: int = Field(default=None, primary_key=True)
+    codigo_manzana: str = Field(max_length=20, unique=True, index=True)
+    comuna_id: int = Field(foreign_key="comunas.id")
+    distrito_censal: str = Field(max_length=10)
+    zona_censal: str = Field(max_length=10)
+    
+    # Geometría
+    geometry: Optional[str] = Field(sa_column=Column(Geometry("POLYGON", srid=4326)))
+    centroid: Optional[str] = Field(sa_column=Column(Geometry("POINT", srid=4326)))
+    
+    # Métricas agregadas (calculadas)
+    superficie_m2: Decimal = Field(default=0)
+    num_predios: int = Field(default=0)
+    valor_promedio_uf_m2: Decimal = Field(default=0, decimal_places=2)
+    indice_consolidacion: Decimal = Field(default=0, decimal_places=2)  # 0-100
+    
+    # Relaciones
+    comuna: Optional[Comuna] = Relationship(back_populates="manzanas")
+    predios: List["Predio"] = Relationship(back_populates="manzana")
+    valoraciones: List["ValoracionManzana"] = Relationship(back_populates="manzana")
+
+
+class Predio(SQLModel, table=True):
+    """Predio individual (rol SII)"""
+    __tablename__ = "predios"
+    
+    id: int = Field(default=None, primary_key=True)
+    rol_sii: str = Field(max_length=20, unique=True, index=True)  # Ej: "13119-00123"
+    comuna_id: int = Field(foreign_key="comunas.id")
+    manzana_id: Optional[int] = Field(foreign_key="manzanas.id")
+    
+    # Identificación
+    direccion: str = Field(max_length=255)
+    numero: Optional[str] = Field(max_length=20)
+    
+    # Características físicas
+    superficie_terreno_m2: Decimal = Field(default=0, decimal_places=2)
+    superficie_construida_m2: Decimal = Field(default=0, decimal_places=2)
+    tipo_predio: str = Field(max_length=50)  # "sitio_eriazo", "casa", "edificio", "agricola"
+    destino: str = Field(max_length=50)  # "habitacional", "comercial", "industrial", "mixto"
+    
+    # Avalúo SII
+    avaluo_fiscal_uf: Decimal = Field(default=0, decimal_places=2)
+    fecha_avaluo: Optional[date] = None
+    
+    # Geometría
+    geometry: Optional[str] = Field(sa_column=Column(Geometry("POLYGON", srid=4326)))
+    
+    # Relaciones
+    comuna: Optional[Comuna] = Relationship(back_populates="predios")
+    manzana: Optional[Manzana] = Relationship(back_populates="predios")
+    transacciones: List["TransaccionInmobiliaria"] = Relationship(back_populates="predio")
+    permisos: List["PermisoEdificacion"] = Relationship(back_populates="predio")
+    valoraciones: List["ValoracionPredio"] = Relationship(back_populates="predio")
+
+
+# =============================================================================
+# ENTIDADES DE TRANSACCIONES Y MERCADO
+# =============================================================================
+
+class TransaccionInmobiliaria(SQLModel, table=True):
+    """Transacción de compraventa registrada"""
+    __tablename__ = "transacciones_inmobiliarias"
+    
+    id: int = Field(default=None, primary_key=True)
+    predio_id: int = Field(foreign_key="predios.id", index=True)
+    
+    # Datos de la transacción
+    fecha_transaccion: date = Field(index=True)
+    tipo_transaccion: str = Field(max_length=50)  # "compraventa", "herencia", "adjudicacion"
+    monto_uf: Decimal = Field(decimal_places=2)
+    monto_clp: int
+    
+    # Datos de inscripción
+    foja: Optional[int] = None
+    numero_inscripcion: Optional[int] = None
+    anio_inscripcion: Optional[int] = None
+    conservador: Optional[str] = Field(max_length=100)
+    
+    # Calculados
+    precio_uf_m2: Decimal = Field(default=0, decimal_places=2)
+    
+    # Relación
+    predio: Optional[Predio] = Relationship(back_populates="transacciones")
+    
+    __table_args__ = (
+        Index("ix_transacciones_fecha_comuna", "fecha_transaccion", "predio_id"),
+    )
+
+
+class OfertaInmobiliaria(SQLModel, table=True):
+    """Oferta de venta/arriendo en portales"""
+    __tablename__ = "ofertas_inmobiliarias"
+    
+    id: int = Field(default=None, primary_key=True)
+    predio_id: Optional[int] = Field(foreign_key="predios.id")
+    
+    # Identificación
+    fuente: str = Field(max_length=50)  # "portalinmobiliario", "yapo", "toctoc"
+    url_original: str = Field(max_length=500)
+    fecha_publicacion: date
+    fecha_scraping: datetime = Field(default_factory=datetime.utcnow)
+    
+    # Datos de la oferta
+    tipo_operacion: str = Field(max_length=20)  # "venta", "arriendo"
+    precio_uf: Decimal = Field(decimal_places=2)
+    precio_clp: int
+    
+    # Ubicación
+    comuna_nombre: str = Field(max_length=100)
+    direccion_aproximada: str = Field(max_length=255)
+    latitud: Optional[Decimal] = Field(decimal_places=6)
+    longitud: Optional[Decimal] = Field(decimal_places=6)
+    
+    # Características
+    superficie_m2: Decimal = Field(default=0, decimal_places=2)
+    dormitorios: Optional[int] = None
+    banos: Optional[int] = None
+    tipo_propiedad: str = Field(max_length=50)
+    
+    # Calculados
+    precio_uf_m2: Decimal = Field(default=0, decimal_places=2)
+    activo: bool = Field(default=True)
+
+
+# =============================================================================
+# ENTIDADES DE PLUSVALÍA Y VALORACIÓN
+# =============================================================================
+
+class ValoracionManzana(SQLModel, table=True):
+    """Valoración histórica por manzana (serie temporal)"""
+    __tablename__ = "valoraciones_manzana"
+    
+    id: int = Field(default=None, primary_key=True)
+    manzana_id: int = Field(foreign_key="manzanas.id", index=True)
+    
+    # Período
+    fecha: date = Field(index=True)  # Primer día del mes
+    periodo: str = Field(max_length=7)  # "2025-01"
+    
+    # Valores calculados
+    valor_promedio_uf_m2: Decimal = Field(decimal_places=2)
+    valor_mediana_uf_m2: Decimal = Field(decimal_places=2)
+    valor_minimo_uf_m2: Decimal = Field(decimal_places=2)
+    valor_maximo_uf_m2: Decimal = Field(decimal_places=2)
+    desviacion_estandar: Decimal = Field(decimal_places=2)
+    
+    # Plusvalía
+    plusvalia_mensual_pct: Decimal = Field(default=0, decimal_places=2)
+    plusvalia_anual_pct: Decimal = Field(default=0, decimal_places=2)
+    plusvalia_acumulada_pct: Decimal = Field(default=0, decimal_places=2)
+    
+    # Metadata
+    num_transacciones: int = Field(default=0)
+    num_ofertas: int = Field(default=0)
+    confianza: Decimal = Field(default=0, decimal_places=2)  # 0-1
+    
+    # Relación
+    manzana: Optional[Manzana] = Relationship(back_populates="valoraciones")
+    
+    __table_args__ = (
+        Index("ix_valoraciones_manzana_periodo", "manzana_id", "periodo", unique=True),
+    )
+
+
+class ValoracionPredio(SQLModel, table=True):
+    """Valoración específica de un predio"""
+    __tablename__ = "valoraciones_predio"
+    
+    id: int = Field(default=None, primary_key=True)
+    predio_id: int = Field(foreign_key="predios.id", index=True)
+    
+    # Período
+    fecha_valoracion: date = Field(index=True)
+    
+    # Valores
+    valor_estimado_uf: Decimal = Field(decimal_places=2)
+    valor_uf_m2: Decimal = Field(decimal_places=2)
+    metodo_valoracion: str = Field(max_length=50)  # "mercado", "hedonic", "ml"
+    
+    # Plusvalía respecto a valor anterior
+    plusvalia_pct: Decimal = Field(default=0, decimal_places=2)
+    
+    # Intervalos de confianza
+    valor_minimo_uf: Decimal = Field(decimal_places=2)
+    valor_maximo_uf: Decimal = Field(decimal_places=2)
+    confianza: Decimal = Field(default=0, decimal_places=2)
+    
+    # Relación
+    predio: Optional[Predio] = Relationship(back_populates="valoraciones")
+
+
+class CalculoPlusvalia(SQLModel, table=True):
+    """Cálculo de plusvalía según Ley 21.713"""
+    __tablename__ = "calculos_plusvalia"
+    
+    id: int = Field(default=None, primary_key=True)
+    uuid: str = Field(default_factory=lambda: str(uuid.uuid4()), unique=True)
+    predio_id: int = Field(foreign_key="predios.id", index=True)
+    
+    # Período de análisis
+    fecha_inicio: date
+    fecha_fin: date
+    
+    # Valores base
+    valor_inicial_uf: Decimal = Field(decimal_places=2)
+    valor_final_uf: Decimal = Field(decimal_places=2)
+    
+    # Ajustes según Ley 21.713
+    ajuste_ipc: Decimal = Field(decimal_places=2)  # Corrección monetaria
+    ajuste_mejoras: Decimal = Field(decimal_places=2)  # Deducciones permitidas
+    ajuste_depreciacion: Decimal = Field(decimal_places=2)
+    
+    # Plusvalía calculada
+    plusvalia_bruta_uf: Decimal = Field(decimal_places=2)
+    plusvalia_neta_uf: Decimal = Field(decimal_places=2)
+    plusvalia_pct: Decimal = Field(decimal_places=2)
+    
+    # Impuesto (si aplica)
+    base_imponible_uf: Decimal = Field(decimal_places=2)
+    tasa_impuesto: Decimal = Field(decimal_places=2)  # Ej: 0.10 (10%)
+    impuesto_estimado_uf: Decimal = Field(decimal_places=2)
+    
+    # Metadata
+    fecha_calculo: datetime = Field(default_factory=datetime.utcnow)
+    calculado_por: str = Field(max_length=100)  # "sistema", "usuario_xxx"
+    version_ley: str = Field(default="21.713", max_length=20)
+
+
+# =============================================================================
+# ENTIDADES NORMATIVAS Y PERMISOS
+# =============================================================================
+
+class ZonificacionPRC(SQLModel, table=True):
+    """Zonificación del Plan Regulador Comunal"""
+    __tablename__ = "zonificacion_prc"
+    
+    id: int = Field(default=None, primary_key=True)
+    comuna_id: int = Field(foreign_key="comunas.id")
+    
+    # Identificación
+    codigo_zona: str = Field(max_length=20)  # Ej: "ZU-1", "ZR-2"
+    nombre_zona: str = Field(max_length=100)
+    
+    # Parámetros urbanísticos
+    uso_suelo_principal: str = Field(max_length=50)
+    usos_permitidos: str  # JSON array
+    coef_constructibilidad: Decimal = Field(decimal_places=2)
+    coef_ocupacion_suelo: Decimal = Field(decimal_places=2)
+    altura_maxima_m: Decimal = Field(decimal_places=2)
+    densidad_hab_ha: Optional[int] = None
+    
+    # Geometría
+    geometry: Optional[str] = Field(sa_column=Column(Geometry("MULTIPOLYGON", srid=4326)))
+    
+    # Vigencia
+    fecha_vigencia: date
+    instrumento: str = Field(max_length=100)  # "PRC Pudahuel 2020"
+
+
+class PermisoEdificacion(SQLModel, table=True):
+    """Permisos de edificación otorgados por DOM"""
+    __tablename__ = "permisos_edificacion"
+    
+    id: int = Field(default=None, primary_key=True)
+    predio_id: int = Field(foreign_key="predios.id", index=True)
+    
+    # Identificación
+    numero_permiso: str = Field(max_length=50)
+    fecha_solicitud: date
+    fecha_otorgamiento: Optional[date] = None
+    
+    # Tipo de obra
+    tipo_obra: str = Field(max_length=50)  # "obra_nueva", "ampliacion", "regularizacion"
+    destino: str = Field(max_length=50)
+    
+    # Superficies
+    superficie_terreno_m2: Decimal = Field(decimal_places=2)
+    superficie_construir_m2: Decimal = Field(decimal_places=2)
+    pisos: int = Field(default=1)
+    
+    # Estado
+    estado: str = Field(max_length=30)  # "tramite", "aprobado", "rechazado", "recepcionado"
+    
+    # Relación
+    predio: Optional[Predio] = Relationship(back_populates="permisos")
+
+
+# =============================================================================
+# ENTIDADES DE PREDICCIÓN Y ANÁLISIS
+# =============================================================================
+
+class PrediccionPlusvalia(SQLModel, table=True):
+    """Predicciones generadas por modelos ML"""
+    __tablename__ = "predicciones_plusvalia"
+    
+    id: int = Field(default=None, primary_key=True)
+    manzana_id: Optional[int] = Field(foreign_key="manzanas.id")
+    predio_id: Optional[int] = Field(foreign_key="predios.id")
+    
+    # Modelo
+    modelo: str = Field(max_length=50)  # "prophet", "arima", "xgboost"
+    version_modelo: str = Field(max_length=20)
+    
+    # Horizonte
+    fecha_prediccion: date  # Cuándo se hizo la predicción
+    fecha_objetivo: date  # Para qué fecha se predice
+    horizonte_meses: int
+    
+    # Valores predichos
+    valor_predicho_uf_m2: Decimal = Field(decimal_places=2)
+    plusvalia_predicha_pct: Decimal = Field(decimal_places=2)
+    
+    # Intervalos de confianza
+    intervalo_inf_80: Decimal = Field(decimal_places=2)
+    intervalo_sup_80: Decimal = Field(decimal_places=2)
+    intervalo_inf_95: Decimal = Field(decimal_places=2)
+    intervalo_sup_95: Decimal = Field(decimal_places=2)
+    
+    # Métricas del modelo
+    rmse: Decimal = Field(decimal_places=4)
+    mape: Decimal = Field(decimal_places=4)
+
+
+class AlertaPlusvalia(SQLModel, table=True):
+    """Alertas de cambios significativos"""
+    __tablename__ = "alertas_plusvalia"
+    
+    id: int = Field(default=None, primary_key=True)
+    uuid: str = Field(default_factory=lambda: str(uuid.uuid4()), unique=True)
+    
+    # Ubicación
+    manzana_id: Optional[int] = Field(foreign_key="manzanas.id")
+    predio_id: Optional[int] = Field(foreign_key="predios.id")
+    
+    # Tipo de alerta
+    tipo_alerta: str = Field(max_length=50)  # "plusvalia_alta", "caida_valor", "anomalia"
+    severidad: str = Field(max_length=20)  # "info", "warning", "critical"
+    
+    # Descripción
+    titulo: str = Field(max_length=200)
+    descripcion: str
+    
+    # Valores
+    valor_detectado: Decimal = Field(decimal_places=2)
+    valor_umbral: Decimal = Field(decimal_places=2)
+    desviacion_pct: Decimal = Field(decimal_places=2)
+    
+    # Estado
+    fecha_creacion: datetime = Field(default_factory=datetime.utcnow)
+    estado: str = Field(default="activa", max_length=20)  # "activa", "revisada", "resuelta"
+    revisado_por: Optional[str] = Field(max_length=100)
+    fecha_revision: Optional[datetime] = None
+    
+    # Destinatarios
+    unidad_municipal: str = Field(max_length=50)  # "SECPLAC", "DOM", "ALCALDIA", "JURIDICA"
+</div>
+            
+            <h3>5.3 Diagrama Entidad-Relación</h3>
+            
+            <div class="diagram">
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                              DIAGRAMA ENTIDAD-RELACIÓN - PLUSVALÍAS URBANAS                                     │
+├─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                                 │
+│                                         ┌─────────────────┐                                                     │
+│                                         │     REGION      │                                                     │
+│                                         │ ─────────────── │                                                     │
+│                                         │ PK id           │                                                     │
+│                                         │    nombre       │                                                     │
+│                                         └────────┬────────┘                                                     │
+│                                                  │ 1                                                            │
+│                                                  │                                                              │
+│                                                  │ N                                                            │
+│                                         ┌────────▼────────┐                                                     │
+│                                         │     COMUNA      │                                                     │
+│                                         │ ─────────────── │                                                     │
+│                                         │ PK id           │                                                     │
+│                                         │ FK region_id    │                                                     │
+│                                         │    codigo_ine   │                                                     │
+│                                         │    nombre       │                                                     │
+│                                         │    geometry 🌍  │                                                     │
+│                                         └────────┬────────┘                                                     │
+│                                                  │ 1                                                            │
+│                              ┌───────────────────┼───────────────────┐                                          │
+│                              │                   │                   │                                          │
+│                              │ N                 │ N                 │ N                                        │
+│                     ┌────────▼────────┐ ┌───────▼────────┐ ┌────────▼────────┐                                 │
+│                     │    MANZANA      │ │    PREDIO      │ │  ZONIFICACION   │                                 │
+│                     │ ─────────────── │ │ ─────────────── │ │     PRC         │                                 │
+│                     │ PK id           │ │ PK id           │ │ ─────────────── │                                 │
+│                     │ FK comuna_id    │ │ FK comuna_id    │ │ PK id           │                                 │
+│                     │    codigo_manz. │ │ FK manzana_id   │ │ FK comuna_id    │                                 │
+│                     │    geometry 🌍  │ │    rol_sii      │ │    codigo_zona  │                                 │
+│                     │    indice_cons. │ │    direccion    │ │    coef_constr. │                                 │
+│                     │    valor_prom.  │ │    superficie   │ │    geometry 🌍  │                                 │
+│                     └────────┬────────┘ │    avaluo_uf    │ └─────────────────┘                                 │
+│                              │          │    geometry 🌍  │                                                     │
+│                              │          └────────┬────────┘                                                     │
+│                              │ 1                 │ 1                                                            │
+│                              │                   │                                                              │
+│                     ┌────────▼────────┐          │                                                              │
+│                     │  VALORACION     │          ├─────────────────┬─────────────────┐                          │
+│                     │   MANZANA       │          │ N               │ N               │ N                        │
+│                     │ ─────────────── │ ┌───────▼────────┐ ┌──────▼───────┐ ┌───────▼────────┐                 │
+│                     │ PK id           │ │ TRANSACCION    │ │  PERMISO     │ │ VALORACION     │                 │
+│                     │ FK manzana_id   │ │ INMOBILIARIA   │ │ EDIFICACION  │ │   PREDIO       │                 │
+│                     │    fecha        │ │ ─────────────── │ │ ───────────  │ │ ─────────────  │                 │
+│                     │    periodo      │ │ PK id           │ │ PK id        │ │ PK id          │                 │
+│                     │    valor_prom.  │ │ FK predio_id    │ │ FK predio_id │ │ FK predio_id   │                 │
+│                     │    plusvalia_%  │ │    fecha        │ │    numero    │ │    fecha       │                 │
+│                     └─────────────────┘ │    monto_uf     │ │    estado    │ │    valor_uf    │                 │
+│                                         │    precio_uf_m2 │ │    tipo_obra │ │    plusvalia_% │                 │
+│                                         └─────────────────┘ └──────────────┘ └────────────────┘                 │
+│                                                                                                                 │
+│  LEYENDA:                                                                                                       │
+│  ─────────                                                                                                      │
+│  PK = Primary Key    FK = Foreign Key    🌍 = Columna PostGIS (Geometry)                                        │
+│  1───N = Relación uno a muchos                                                                                  │
+│                                                                                                                 │
+│  ENTIDADES ADICIONALES (no mostradas por espacio):                                                              │
+│  • OfertaInmobiliaria: Datos de portales inmobiliarios                                                          │
+│  • CalculoPlusvalia: Cálculos según Ley 21.713                                                                  │
+│  • PrediccionPlusvalia: Proyecciones ML                                                                         │
+│  • AlertaPlusvalia: Alertas para unidades municipales                                                           │
+│                                                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+            </div>
+        </section>
+        
+        <!-- SECCIÓN 6: CASO MUNICIPIO PUDAHUEL -->
+        <section class="section" id="pudahuel">
+            <h2>🏛️ 6. CASO DE USO: MUNICIPIO DE PUDAHUEL</h2>
+            
+            <div class="alert alert-success">
+                <strong>🎯 Objetivo Municipal:</strong> Herramienta de monitoreo y prospectiva territorial que consolide información pública/privada para apoyar decisiones sobre consolidación urbana, inversiones, valores de activos y gestión normativa.
+            </div>
+            
+            <h3>6.1 Funcionalidades por Unidad Municipal</h3>
+            
+            <div class="grid-2">
+                <div class="card" style="border-left: 4px solid #7c3aed;">
+                    <h4>📊 SECPLAC (Secretaría Comunal de Planificación)</h4>
+                    <p><strong>Necesidades:</strong></p>
+                    <ul style="margin: 10px 0 0 15px; line-height: 1.8;">
+                        <li>Mapas de consolidación urbana por sector</li>
+                        <li>Proyecciones de crecimiento poblacional y habitacional</li>
+                        <li>Análisis de brechas de equipamiento vs. densificación</li>
+                        <li>Monitoreo de inversiones públicas/privadas</li>
+                        <li>Indicadores para PLADECO y PRC</li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>Entregables M07-PU:</strong></p>
+                    <ul style="margin: 10px 0 0 15px; line-height: 1.8;">
+                        <li>✅ Dashboard de indicadores territoriales</li>
+                        <li>✅ Mapas temáticos (valores, plusvalía, densidad)</li>
+                        <li>✅ Reportes mensuales automatizados</li>
+                        <li>✅ Alertas de zonas con cambios significativos</li>
+                    </ul>
+                </div>
+                
+                <div class="card" style="border-left: 4px solid #0891b2;">
+                    <h4>🏗️ DOM (Dirección de Obras Municipales)</h4>
+                    <p><strong>Necesidades:</strong></p>
+                    <ul style="margin: 10px 0 0 15px; line-height: 1.8;">
+                        <li>Detección de construcciones sin permiso</li>
+                        <li>Análisis de impacto de permisos en valorización</li>
+                        <li>Verificación de cumplimiento PRC</li>
+                        <li>Proyección de demanda de permisos por zona</li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>Entregables M07-PU:</strong></p>
+                    <ul style="margin: 10px 0 0 15px; line-height: 1.8;">
+                        <li>✅ Integración con M04 (detector satelital)</li>
+                        <li>✅ Alertas de construcciones irregulares</li>
+                        <li>✅ Análisis de potencial edificatorio</li>
+                        <li>✅ Correlación permisos vs. plusvalía</li>
+                    </ul>
+                </div>
+                
+                <div class="card" style="border-left: 4px solid #059669;">
+                    <h4>🏛️ ALCALDÍA</h4>
+                    <p><strong>Necesidades:</strong></p>
+                    <ul style="margin: 10px 0 0 15px; line-height: 1.8;">
+                        <li>Dashboard ejecutivo con KPIs clave</li>
+                        <li>Visión consolidada del territorio</li>
+                        <li>Alertas de inversiones y cambios relevantes</li>
+                        <li>Información para comunicación ciudadana</li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>Entregables M07-PU:</strong></p>
+                    <ul style="margin: 10px 0 0 15px; line-height: 1.8;">
+                        <li>✅ Panel ejecutivo simplificado</li>
+                        <li>✅ Comparativa con otras comunas</li>
+                        <li>✅ Resumen de inversiones y proyectos</li>
+                        <li>✅ Indicadores de gestión territorial</li>
+                    </ul>
+                </div>
+                
+                <div class="card" style="border-left: 4px solid #d97706;">
+                    <h4>⚖️ ASESORÍA JURÍDICA</h4>
+                    <p><strong>Necesidades:</strong></p>
+                    <ul style="margin: 10px 0 0 15px; line-height: 1.8;">
+                        <li>Detección de conflictos normativos</li>
+                        <li>Análisis de casos para expropiaciones</li>
+                        <li>Evaluación de impacto de cambios de zonificación</li>
+                        <li>Información para litigios territoriales</li>
+                    </ul>
+                    <p style="margin-top: 15px;"><strong>Entregables M07-PU:</strong></p>
+                    <ul style="margin: 10px 0 0 15px; line-height: 1.8;">
+                        <li>✅ RAG sobre LGUC, OGUC, PRC</li>
+                        <li>✅ Alertas de inconsistencias normativas</li>
+                        <li>✅ Valoraciones para tasaciones legales</li>
+                        <li>✅ Historial de transacciones por predio</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <h3>6.2 Zonas de Interés Específicas en Pudahuel</h3>
+            
+            <table>
+                <tr>
+                    <th>Zona</th>
+                    <th>Características</th>
+                    <th>Análisis Requerido</th>
+                    <th>Prioridad</th>
+                </tr>
+                <tr>
+                    <td><strong>Lo Aguirre</strong></td>
+                    <td>Área excluida de desarrollo urbano, proyectos inmobiliarios emergentes</td>
+                    <td>Proyección de cambio de uso, impacto en valorización</td>
+                    <td><span class="badge badge-danger">CRÍTICA</span></td>
+                </tr>
+                <tr>
+                    <td><strong>El Noviciado</strong></td>
+                    <td>Expansión urbana, loteos irregulares históricos</td>
+                    <td>Consolidación, regularización, plusvalía potencial</td>
+                    <td><span class="badge badge-danger">CRÍTICA</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Aeropuerto AMB</strong></td>
+                    <td>Zona de influencia económica y logística</td>
+                    <td>Impacto de inversiones, usos industriales vs. residenciales</td>
+                    <td><span class="badge badge-warning">ALTA</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Ciudad de los Valles</strong></td>
+                    <td>Desarrollo inmobiliario consolidado</td>
+                    <td>Tendencias de mercado, proyecciones de valor</td>
+                    <td><span class="badge badge-info">MEDIA</span></td>
+                </tr>
+                <tr>
+                    <td><strong>Teniente Cruz</strong></td>
+                    <td>Centro histórico, mixtura de usos</td>
+                    <td>Renovación urbana, potencial de densificación</td>
+                    <td><span class="badge badge-info">MEDIA</span></td>
+                </tr>
+            </table>
+            
+            <h3>6.3 Indicadores Clave para Pudahuel</h3>
+            
+            <div class="grid-3">
+                <div class="entity-box">
+                    <h5>📈 Económicos</h5>
+                    <ul style="margin: 10px 0 0 15px; font-size: 0.9rem; line-height: 1.8;">
+                        <li>Plusvalía promedio anual (%)</li>
+                        <li>Valor UF/m² por sector</li>
+                        <li>Inversión privada acumulada (UF)</li>
+                        <li>Recaudación potencial impuesto</li>
+                    </ul>
+                </div>
+                <div class="entity-box">
+                    <h5>🏗️ Físico-Espaciales</h5>
+                    <ul style="margin: 10px 0 0 15px; font-size: 0.9rem; line-height: 1.8;">
+                        <li>Índice de consolidación (0-100)</li>
+                        <li>Superficie construida nueva (m²)</li>
+                        <li>Densidad habitacional (hab/ha)</li>
+                        <li>Cobertura de servicios (%)</li>
+                    </ul>
+                </div>
+                <div class="entity-box">
+                    <h5>📊 Gestión</h5>
+                    <ul style="margin: 10px 0 0 15px; font-size: 0.9rem; line-height: 1.8;">
+                        <li>Permisos otorgados vs. recepcionados</li>
+                        <li>Construcciones irregulares detectadas</li>
+                        <li>Alertas generadas/resueltas</li>
+                        <li>Tiempo promedio de trámites</li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+        
+        <!-- SECCIÓN 7: PLAN DE IMPLEMENTACIÓN -->
+        <section class="section" id="implementacion">
+            <h2>📅 7. PLAN DE IMPLEMENTACIÓN POR ETAPAS</h2>
+            
+            <div class="alert alert-info">
+                <strong>🎯 Enfoque:</strong> Desarrollo iterativo combinando Rutas 1, 2 y 3 en orden lógico de dependencias técnicas.
+            </div>
+            
+            <h3>ETAPA 1: Fundamentos (Semanas 1-3) - RUTA 1</h3>
+            
+            <table>
+                <tr>
+                    <th>Semana</th>
+                    <th>Actividad</th>
+                    <th>Entregable</th>
+                    <th>Unidad Beneficiada</th>
+                </tr>
+                <tr>
+                    <td><strong>1</strong></td>
+                    <td>
+                        • Diseño final modelo de datos<br>
+                        • Configurar PostgreSQL + PostGIS<br>
+                        • Crear migraciones Alembic
+                    </td>
+                    <td>
+                        📦 BD con 15 tablas<br>
+                        📦 Migraciones versionadas
+                    </td>
+                    <td>Todas</td>
+                </tr>
+                <tr>
+                    <td><strong>2</strong></td>
+                    <td>
+                        • Implementar schemas Pydantic V2<br>
+                        • Crear servicios CRUD base<br>
+                        • Configurar docker-compose
+                    </td>
+                    <td>
+                        📦 Schemas validación<br>
+                        📦 CRUD operations<br>
+                        📦 docker-compose.yml
+                    </td>
+                    <td>Todas</td>
+                </tr>
+                <tr>
+                    <td><strong>3</strong></td>
+                    <td>
+                        • Integrar con Event Bus existente<br>
+                        • Implementar tests unitarios<br>
+                        • Cargar datos iniciales Pudahuel
+                    </td>
+                    <td>
+                        📦 Eventos definidos<br>
+                        📦 Tests (coverage 70%)<br>
+                        📦 Seed data Pudahuel
+                    </td>
+                    <td>SECPLAC, DOM</td>
+                </tr>
+            </table>
+            
+            <h3>ETAPA 2: Módulo Core + Agentes (Semanas 4-8) - RUTA 2</h3>
+            
+            <table>
+                <tr>
+                    <th>Semana</th>
+                    <th>Actividad</th>
+                    <th>Entregable</th>
+                    <th>Unidad Beneficiada</th>
+                </tr>
+                <tr>
+                    <td><strong>4</strong></td>
+                    <td>
+                        • Implementar DataAgent<br>
+                        • Conectores SII, CBR<br>
+                        • Scrapers portales inmobiliarios
+                    </td>
+                    <td>
+                        📦 data_agent.py<br>
+                        📦 3 conectores API<br>
+                        📦 2 scrapers
+                    </td>
+                    <td>SECPLAC</td>
+                </tr>
+                <tr>
+                    <td><strong>5</strong></td>
+                    <td>
+                        • Implementar ModelAgent<br>
+                        • Fórmulas Ley 21.713<br>
+                        • Modelo Prophet básico
+                    </td>
+                    <td>
+                        📦 model_agent.py<br>
+                        📦 Cálculo plusvalía<br>
+                        📦 Prophet entrenado
+                    </td>
+                    <td>SECPLAC, Jurídica</td>
+                </tr>
+                <tr>
+                    <td><strong>6</strong></td>
+                    <td>
+                        • Implementar RegulatoryAgent<br>
+                        • RAG sobre LGUC, OGUC, PRC<br>
+                        • Integrar con RLM Engine
+                    </td>
+                    <td>
+                        📦 regulatory_agent.py<br>
+                        📦 ChromaDB con normativa<br>
+                        📦 Consultas NLP
+                    </td>
+                    <td>Jurídica, DOM</td>
+                </tr>
+                <tr>
+                    <td><strong>7</strong></td>
+                    <td>
+                        • Implementar VisualizationAgent<br>
+                        • Mapas PostGIS → Folium<br>
+                        • Reportes PDF automáticos
+                    </td>
+                    <td>
+                        📦 visualization_agent.py<br>
+                        📦 Mapas temáticos<br>
+                        📦 Templates reportes
+                    </td>
+                    <td>Alcaldía, SECPLAC</td>
+                </tr>
+                <tr>
+                    <td><strong>8</strong></td>
+                    <td>
+                        • Router FastAPI completo<br>
+                        • Orquestación agentes<br>
+                        • Tests de integración
+                    </td>
+                    <td>
+                        📦 20+ endpoints<br>
+                        📦 Flujos multi-agente<br>
+                        📦 Tests (coverage 80%)
+                    </td>
+                    <td>Todas</td>
+                </tr>
+            </table>
+            
+            <h3>ETAPA 3: Frontend + Deploy Pudahuel (Semanas 9-12) - RUTA 3</h3>
+            
+            <table>
+                <tr>
+                    <th>Semana</th>
+                    <th>Actividad</th>
+                    <th>Entregable</th>
+                    <th>Unidad Beneficiada</th>
+                </tr>
+                <tr>
+                    <td><strong>9</strong></td>
+                    <td>
+                        • Diseño UI/UX por unidad<br>
+                        • Dashboard Alcaldía<br>
+                        • Panel SECPLAC con mapas
+                    </td>
+                    <td>
+                        📦 Wireframes validados<br>
+                        📦 Dashboard ejecutivo<br>
+                        📦 Visor mapas
+                    </td>
+                    <td>Alcaldía, SECPLAC</td>
+                </tr>
+                <tr>
+                    <td><strong>10</strong></td>
+                    <td>
+                        • Panel DOM<br>
+                        • Visor Jurídica<br>
+                        • Sistema de alertas
+                    </td>
+                    <td>
+                        📦 Panel permisos<br>
+                        📦 Consultor normativo<br>
+                        📦 Notificaciones
+                    </td>
+                    <td>DOM, Jurídica</td>
+                </tr>
+                <tr>
+                    <td><strong>11</strong></td>
+                    <td>
+                        • Deploy en servidor municipal<br>
+                        • Configuración producción<br>
+                        • Capacitación usuarios
+                    </td>
+                    <td>
+                        📦 Sistema en producción<br>
+                        📦 Documentación<br>
+                        📦 4 sesiones capacitación
+                    </td>
+                    <td>Todas</td>
+                </tr>
+                <tr>
+                    <td><strong>12</strong></td>
+                    <td>
+                        • Ajustes post-feedback<br>
+                        • Documentación final<br>
+                        • Entrega formal
+                    </td>
+                    <td>
+                        📦 Sistema ajustado<br>
+                        📦 Manual de usuario<br>
+                        📦 Acta de entrega
+                    </td>
+                    <td>Todas</td>
+                </tr>
+            </table>
+            
+            <h3>7.1 Hitos y Entregables por Ruta</h3>
+            
+            <div class="diagram">
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                                    ROADMAP INTEGRADO RUTAS 1-2-3                                                │
+├─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                                                 │
+│  SEMANA   1    2    3    4    5    6    7    8    9   10   11   12                                              │
+│  ────────────────────────────────────────────────────────────────────────────────────────────────               │
+│                                                                                                                 │
+│  RUTA 1   ████████████████████                                                                                  │
+│  Backend  │← BD →│← API →│← Test →│                                                                             │
+│           │      │       │        │                                                                             │
+│           │      │       │        │                                                                             │
+│  RUTA 2                  ████████████████████████████████                                                       │
+│  Agentes                 │← Data →│← Model →│← Reg →│← Viz →│← Orq →│                                          │
+│                          │ Agent  │  Agent  │ Agent │ Agent │uest.  │                                          │
+│                          │        │         │       │       │       │                                          │
+│  RUTA 3                                                      ████████████████████                               │
+│  Frontend                                                    │← UI →│← Deploy →│← Ajustes →│                   │
+│                                                                                                                 │
+│  ═══════════════════════════════════════════════════════════════════════════════════════════════════════════   │
+│  HITOS:                                                                                                         │
+│                                                                                                                 │
+│  🔵 Sem 3: BD + API base lista                                                                                  │
+│  🟣 Sem 5: Cálculo plusvalía funcional                                                                          │
+│  🟣 Sem 8: Sistema multi-agente integrado                                                                       │
+│  🟢 Sem 11: Deploy producción Pudahuel                                                                          │
+│  ✅ Sem 12: Entrega formal al municipio                                                                         │
+│                                                                                                                 │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+            </div>
+        </section>
+        
+        <!-- SECCIÓN 8: CÓDIGO -->
+        <section class="section" id="codigo">
+            <h2>💻 8. CÓDIGO DE IMPLEMENTACIÓN INICIAL</h2>
+            
+            <div class="alert alert-info">
+                <strong>📌 Nota:</strong> Este es el código base para iniciar la implementación. Se continuará desarrollando en etapas siguientes.
+            </div>
+            
+            <h3>8.1 Estructura de Directorios Propuesta</h3>
+            
+            <div class="code-block">
+DATAPOLIS_AI/
+├── api/
+│   ├── __init__.py
+│   ├── main_api.py                 # FastAPI principal (existente)
+│   └── routers/
+│       ├── __init__.py
+│       └── plusvalia_urbana.py     # Router M07-PU (NUEVO)
+├── core/
+│   ├── rlm/                        # RLM Engine (existente)
+│   ├── events/                     # Event Bus (existente)
+│   └── memory/                     # Memory Manager (existente)
+├── modules/
+│   ├── all_modules.py              # Módulos existentes
+│   └── plusvalia_urbana/           # NUEVO MÓDULO M07-PU
+│       ├── __init__.py
+│       ├── service.py              # Servicio principal
+│       ├── agents/
+│       │   ├── __init__.py
+│       │   ├── data_agent.py       # Agente de datos
+│       │   ├── model_agent.py      # Agente de modelación
+│       │   ├── regulatory_agent.py # Agente regulatorio
+│       │   └── visualization_agent.py # Agente visualización
+│       ├── models/
+│       │   ├── __init__.py
+│       │   └── entities.py         # Modelos SQLModel
+│       ├── schemas/
+│       │   ├── __init__.py
+│       │   └── requests.py         # Schemas Pydantic
+│       └── utils/
+│           ├── __init__.py
+│           ├── formulas.py         # Fórmulas Ley 21.713
+│           └── geo.py              # Utilidades PostGIS
+├── config/
+│   └── settings.py                 # Configuración (existente)
+├── alembic/
+│   └── versions/                   # Migraciones BD
+├── tests/
+│   ├── test_integration.py         # Tests existentes
+│   └── test_plusvalia_urbana.py    # Tests M07-PU (NUEVO)
+├── frontend/                       # Next.js (existente)
+├── docker-compose.yml              # Docker (existente)
+├── requirements.txt                # Dependencias (actualizar)
+└── README.md
+            </div>
+            
+            <h3>8.2 Servicio Principal M07-PU</h3>
+            
+            <div class="file-header">
+                <span>📁 modules/plusvalia_urbana/service.py</span>
+                <span class="lang">Python 3.11+</span>
+            </div>
+            <div class="code-block">
+"""
+================================================================================
+M07-PU: MÓDULO DE PLUSVALÍAS URBANAS
+================================================================================
+Servicio principal que orquesta los agentes especializados para análisis
+de plusvalía y valorización territorial.
+
+Caso de uso: Municipio de Pudahuel (SECPLAC, DOM, Alcaldía, Jurídica)
+
+Stack: FastAPI + SQLModel + PostGIS + Ollama + Prophet
+
+Versión: 1.0.0
+Autor: DATAPOLIS SpA
+Fecha: 2026-02-04
+================================================================================
+"""
+
+from typing import Dict, Any, Optional, List
+from dataclasses import dataclass, field
+from datetime import datetime, date
+from decimal import Decimal
+from enum import Enum
+import asyncio
+import logging
+
+from sqlmodel import Session, select
+from geoalchemy2.functions import ST_Within, ST_Buffer
+
+# Imports internos
+from modules.plusvalia_urbana.agents.data_agent import DataAgent
+from modules.plusvalia_urbana.agents.model_agent import ModelAgent
+from modules.plusvalia_urbana.agents.regulatory_agent import RegulatoryAgent
+from modules.plusvalia_urbana.agents.visualization_agent import VisualizationAgent
+from modules.plusvalia_urbana.models.entities import (
+    Manzana, Predio, ValoracionManzana, CalculoPlusvalia, AlertaPlusvalia
+)
+from core.events.event_bus import EventBus, Event, EventType
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger("M07-PU.Service")
+
+
+# =============================================================================
+# ENUMS Y CONFIGURACIÓN
+# =============================================================================
+
+class UnidadMunicipal(Enum):
+    """Unidades municipales destino de reportes"""
+    SECPLAC = "secplac"
+    DOM = "dom"
+    ALCALDIA = "alcaldia"
+    JURIDICA = "juridica"
+    OTRAS = "otras"
+
+
+class TipoAnalisis(Enum):
+    """Tipos de análisis disponibles"""
+    PLUSVALIA_HISTORICA = "plusvalia_historica"
+    PROYECCION_VALOR = "proyeccion_valor"
+    CONSOLIDACION = "consolidacion"
+    COMPARATIVO = "comparativo"
+    ALERTA = "alerta"
+
+
+@dataclass
+class ConfiguracionPlusvalia:
+    """Configuración del módulo"""
+    comuna_codigo: str = "13119"  # Pudahuel
+    horizonte_prediccion_meses: int = 12
+    umbral_alerta_plusvalia: float = 15.0  # 15%
+    umbral_alerta_caida: float = -10.0  # -10%
+    modelo_prediccion: str = "prophet"  # "prophet", "arima", "xgboost"
+    confianza_minima: float = 0.7
+
+
+# =============================================================================
+# SERVICIO PRINCIPAL
+# =============================================================================
+
+class M07_PlusvaliaUrbanaService:
+    """
+    Servicio principal del Módulo de Plusvalías Urbanas.
+    
+    Orquesta los 4 agentes especializados:
+    - DataAgent: Recolección y validación de datos
+    - ModelAgent: Cálculos y predicciones
+    - RegulatoryAgent: Análisis normativo
+    - VisualizationAgent: Mapas y reportes
+    
+    Integración con DATAPOLIS AI:
+    - Usa Event Bus para comunicación con otros módulos
+    - Usa RLM Engine para consultas NLP complejas
+    - Usa Memory Manager para persistencia de contexto
+    """
+    
+    def __init__(
+        self,
+        db_session: Session,
+        event_bus: EventBus,
+        config: Optional[ConfiguracionPlusvalia] = None
+    ):
+        self.db = db_session
+        self.event_bus = event_bus
+        self.config = config or ConfiguracionPlusvalia()
+        
+        # Inicializar agentes
+        self.data_agent = DataAgent(db_session, event_bus)
+        self.model_agent = ModelAgent(db_session, event_bus)
+        self.regulatory_agent = RegulatoryAgent(db_session, event_bus)
+        self.viz_agent = VisualizationAgent(db_session, event_bus)
+        
+        # Registrar handlers de eventos
+        self._register_event_handlers()
+        
+        logger.info(f"M07-PU Service inicializado para comuna {self.config.comuna_codigo}")
+    
+    def _register_event_handlers(self):
+        """Registra handlers para eventos de otros módulos"""
+        
+        # Escuchar detecciones de M04 (construcciones)
+        self.event_bus.subscribe(
+            "construccion.detectada",
+            self._handle_construccion_detectada
+        )
+        
+        # Escuchar cambios normativos
+        self.event_bus.subscribe(
+            "normativa.actualizada",
+            self._handle_normativa_actualizada
+        )
+    
+    # =========================================================================
+    # MÉTODOS PRINCIPALES
+    # =========================================================================
+    
+    async def calcular_plusvalia(
+        self,
+        zona_id: Optional[int] = None,
+        predio_id: Optional[int] = None,
+        fecha_inicio: Optional[date] = None,
+        fecha_fin: Optional[date] = None
+    ) -> Dict[str, Any]:
+        """
+        Calcula plusvalía histórica de una zona o predio.
+        
+        Flujo:
+        1. DataAgent obtiene transacciones del período
+        2. ModelAgent aplica fórmulas Ley 21.713
+        3. RegulatoryAgent valida cumplimiento normativo
+        4. VisualizationAgent genera reporte
+        
+        Args:
+            zona_id: ID de manzana (opcional)
+            predio_id: ID de predio (opcional)
+            fecha_inicio: Inicio del período
+            fecha_fin: Fin del período
+            
+        Returns:
+            Dict con plusvalía calculada, detalle y métricas
+        """
+        logger.info(f"Calculando plusvalía: zona={zona_id}, predio={predio_id}")
+        
+        # Valores por defecto
+        fecha_fin = fecha_fin or date.today()
+        fecha_inicio = fecha_inicio or date(fecha_fin.year - 5, 1, 1)
+        
+        # PASO 1: Obtener datos
+        datos = await self.data_agent.obtener_transacciones(
+            zona_id=zona_id,
+            predio_id=predio_id,
+            fecha_inicio=fecha_inicio,
+            fecha_fin=fecha_fin
+        )
+        
+        if not datos["transacciones"]:
+            return {
+                "success": False,
+                "error": "No se encontraron transacciones en el período",
+                "zona_id": zona_id,
+                "predio_id": predio_id
+            }
+        
+        # PASO 2: Calcular plusvalía
+        resultado = await self.model_agent.calcular_plusvalia_ley_21713(
+            transacciones=datos["transacciones"],
+            fecha_inicio=fecha_inicio,
+            fecha_fin=fecha_fin
+        )
+        
+        # PASO 3: Validar normativa
+        validacion = await self.regulatory_agent.validar_calculo(
+            resultado=resultado,
+            zona_id=zona_id
+        )
+        
+        # PASO 4: Emitir evento
+        await self.event_bus.publish(Event(
+            type=EventType.DATA_PROCESSED,
+            name="plusvalia.calculada",
+            data={
+                "zona_id": zona_id,
+                "predio_id": predio_id,
+                "plusvalia_pct": resultado["plusvalia_pct"],
+                "fecha_calculo": datetime.utcnow().isoformat()
+            }
+        ))
+        
+        return {
+            "success": True,
+            "zona_id": zona_id,
+            "predio_id": predio_id,
+            "periodo": {
+                "inicio": fecha_inicio.isoformat(),
+                "fin": fecha_fin.isoformat()
+            },
+            "plusvalia": resultado,
+            "validacion_normativa": validacion,
+            "datos_base": {
+                "num_transacciones": len(datos["transacciones"]),
+                "fuentes": datos["fuentes"]
+            }
+        }
+    
+    async def proyectar_valor(
+        self,
+        zona_id: Optional[int] = None,
+        predio_id: Optional[int] = None,
+        horizonte_meses: int = 12
+    ) -> Dict[str, Any]:
+        """
+        Genera proyección de valor futuro usando modelos ML.
+        
+        Modelos disponibles:
+        - Prophet: Series temporales con estacionalidad
+        - ARIMA: Autoregresivo integrado
+        - XGBoost: Gradient boosting con features adicionales
+        
+        Args:
+            zona_id: ID de manzana
+            predio_id: ID de predio
+            horizonte_meses: Meses a proyectar
+            
+        Returns:
+            Dict con proyección, intervalos de confianza y métricas
+        """
+        logger.info(f"Proyectando valor: zona={zona_id}, horizonte={horizonte_meses}m")
+        
+        # Obtener serie histórica
+        serie = await self.data_agent.obtener_serie_temporal(
+            zona_id=zona_id,
+            predio_id=predio_id
+        )
+        
+        # Generar predicción
+        prediccion = await self.model_agent.predecir_valor(
+            serie=serie,
+            horizonte_meses=horizonte_meses,
+            modelo=self.config.modelo_prediccion
+        )
+        
+        # Generar visualización
+        grafico = await self.viz_agent.generar_grafico_prediccion(
+            serie=serie,
+            prediccion=prediccion
+        )
+        
+        # Emitir evento
+        await self.event_bus.publish(Event(
+            type=EventType.PREDICTION_GENERATED,
+            name="prediccion.generada",
+            data={
+                "zona_id": zona_id,
+                "horizonte": horizonte_meses,
+                "valor_predicho": prediccion["valor_predicho"]
+            }
+        ))
+        
+        return {
+            "success": True,
+            "zona_id": zona_id,
+            "predio_id": predio_id,
+            "modelo": self.config.modelo_prediccion,
+            "horizonte_meses": horizonte_meses,
+            "prediccion": prediccion,
+            "grafico_url": grafico["url"],
+            "metricas_modelo": prediccion["metricas"]
+        }
+    
+    async def generar_mapa_plusvalia(
+        self,
+        comuna_codigo: str = "13119",
+        periodo: str = "2025-01",
+        tipo_mapa: str = "heatmap"
+    ) -> Dict[str, Any]:
+        """
+        Genera mapa temático de plusvalía para visualización.
+        
+        Tipos de mapa:
+        - heatmap: Calor por valor UF/m²
+        - coroplético: Colores por manzana
+        - puntos: Transacciones individuales
+        - cambios: Detección de cambios satelitales
+        
+        Args:
+            comuna_codigo: Código INE de la comuna
+            periodo: Mes de análisis (YYYY-MM)
+            tipo_mapa: Tipo de visualización
+            
+        Returns:
+            Dict con URL del mapa y datos asociados
+        """
+        logger.info(f"Generando mapa {tipo_mapa} para {comuna_codigo}, período {periodo}")
+        
+        # Obtener datos geoespaciales
+        datos_geo = await self.data_agent.obtener_datos_geoespaciales(
+            comuna_codigo=comuna_codigo,
+            periodo=periodo
+        )
+        
+        # Generar mapa
+        mapa = await self.viz_agent.generar_mapa(
+            datos=datos_geo,
+            tipo=tipo_mapa,
+            titulo=f"Plusvalía {comuna_codigo} - {periodo}"
+        )
+        
+        return {
+            "success": True,
+            "comuna": comuna_codigo,
+            "periodo": periodo,
+            "tipo_mapa": tipo_mapa,
+            "mapa_url": mapa["url"],
+            "mapa_html": mapa["html"],
+            "estadisticas": datos_geo["estadisticas"],
+            "leyenda": mapa["leyenda"]
+        }
+    
+    async def generar_reporte(
+        self,
+        unidad: UnidadMunicipal,
+        tipo_analisis: TipoAnalisis,
+        parametros: Dict[str, Any]
+    ) -> Dict[str, Any]:
+        """
+        Genera reporte personalizado para unidad municipal.
+        
+        Args:
+            unidad: Unidad destino (SECPLAC, DOM, etc.)
+            tipo_analisis: Tipo de análisis requerido
+            parametros: Parámetros específicos del análisis
+            
+        Returns:
+            Dict con reporte generado en múltiples formatos
+        """
+        logger.info(f"Generando reporte {tipo_analisis.value} para {unidad.value}")
+        
+        # Ejecutar análisis según tipo
+        if tipo_analisis == TipoAnalisis.PLUSVALIA_HISTORICA:
+            datos = await self.calcular_plusvalia(**parametros)
+        elif tipo_analisis == TipoAnalisis.PROYECCION_VALOR:
+            datos = await self.proyectar_valor(**parametros)
+        elif tipo_analisis == TipoAnalisis.CONSOLIDACION:
+            datos = await self._analizar_consolidacion(**parametros)
+        elif tipo_analisis == TipoAnalisis.COMPARATIVO:
+            datos = await self._analizar_comparativo(**parametros)
+        else:
+            datos = {"tipo": tipo_analisis.value, "parametros": parametros}
+        
+        # Generar reporte en formatos requeridos
+        reporte = await self.viz_agent.generar_reporte(
+            datos=datos,
+            unidad=unidad,
+            formato=["pdf", "excel", "html"]
+        )
+        
+        # Emitir evento
+        await self.event_bus.publish(Event(
+            type=EventType.REPORT_GENERATED,
+            name="reporte.generado",
+            data={
+                "unidad": unidad.value,
+                "tipo": tipo_analisis.value,
+                "reporte_id": reporte["id"]
+            }
+        ))
+        
+        return {
+            "success": True,
+            "unidad": unidad.value,
+            "tipo_analisis": tipo_analisis.value,
+            "reporte": reporte,
+            "urls": {
+                "pdf": reporte["url_pdf"],
+                "excel": reporte["url_excel"],
+                "html": reporte["url_html"]
+            }
+        }
+    
+    # =========================================================================
+    # HANDLERS DE EVENTOS
+    # =========================================================================
+    
+    async def _handle_construccion_detectada(self, event: Event):
+        """Handler para evento de M04: construcción detectada"""
+        logger.info(f"Recibido evento construccion.detectada: {event.data}")
+        
+        # Recalcular plusvalía de la zona afectada
+        zona_id = event.data.get("manzana_id")
+        if zona_id:
+            await self.calcular_plusvalia(zona_id=zona_id)
+            
+            # Generar alerta si hay impacto significativo
+            await self._evaluar_y_generar_alerta(
+                zona_id=zona_id,
+                motivo="construccion_detectada",
+                datos=event.data
+            )
+    
+    async def _handle_normativa_actualizada(self, event: Event):
+        """Handler para evento: normativa actualizada"""
+        logger.info(f"Recibido evento normativa.actualizada: {event.data}")
+        
+        # Recargar base de conocimiento del RegulatoryAgent
+        await self.regulatory_agent.actualizar_base_conocimiento(
+            normativa=event.data.get("normativa")
+        )
+    
+    # =========================================================================
+    # MÉTODOS AUXILIARES
+    # =========================================================================
+    
+    async def _analizar_consolidacion(self, **kwargs) -> Dict[str, Any]:
+        """Análisis de nivel de consolidación urbana"""
+        # TODO: Implementar lógica de consolidación
+        return {"tipo": "consolidacion", "pendiente": True}
+    
+    async def _analizar_comparativo(self, **kwargs) -> Dict[str, Any]:
+        """Análisis comparativo entre zonas/comunas"""
+        # TODO: Implementar análisis comparativo
+        return {"tipo": "comparativo", "pendiente": True}
+    
+    async def _evaluar_y_generar_alerta(
+        self,
+        zona_id: int,
+        motivo: str,
+        datos: Dict
+    ):
+        """Evalúa si corresponde generar una alerta"""
+        # Lógica de evaluación de umbrales
+        pass
+</div>
+            
+            <div class="alert alert-success">
+                <strong>✅ Código Base Entregado:</strong> Este servicio principal (M07_PlusvaliaUrbanaService) define la arquitectura y flujos principales. En las siguientes etapas se implementarán los agentes específicos (DataAgent, ModelAgent, RegulatoryAgent, VisualizationAgent) con toda su lógica de negocio.
+            </div>
+        </section>
+        
+        <!-- FOOTER -->
+        <footer style="text-align: center; padding: 40px; color: #64748b; background: white; border-radius: 16px; margin-top: 25px;">
+            <h3 style="color: var(--primary); margin-bottom: 15px;">DATAPOLIS AI + Módulo Plusvalías Urbanas</h3>
+            <p>Integración del Sistema Multi-Agente con Módulo M07-PU</p>
+            <p style="margin-top: 15px;">Caso de Uso: Municipio de Pudahuel (SECPLAC, DOM, Alcaldía, Jurídica)</p>
+            <p style="margin-top: 20px; font-size: 0.9rem;">© 2026 DATAPOLIS SpA - Documento generado por Claude Opus 4.5</p>
+            <p style="font-size: 0.85rem;">Fecha: 04 de Febrero 2026 | Versión: 1.0.0</p>
+        </footer>
+    </div>
+</body>
+</html>

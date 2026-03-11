@@ -1,0 +1,187 @@
+openapi: 3.0.0
+info:
+  title: DATAPOLIS v4.0 API
+  description: Plataforma Integral PropTech + FinTech + RegTech + GovTech + ESG/Capital Natural
+  version: 4.0.0
+  contact:
+    name: DATAPOLIS Support
+    email: support@datapolis.io
+    url: https://datapolis.io
+
+servers:
+  - url: http://localhost:8000
+    description: Desarrollo local
+  - url: https://api.datapolis.io
+    description: Producción
+
+tags:
+  - name: Hedonic Pricing
+    description: Modelos hedónicos de precios espaciales
+  - name: Ecosystem Services
+    description: Valoración de servicios ecosistémicos
+  - name: Natural Capital
+    description: Contabilidad de capital natural
+  - name: Valuation Advisor
+    description: Asesor de métodos de valoración
+  - name: Environmental Data
+    description: Hub de datos ambientales
+
+paths:
+  /api/v1/hedonic/estimate:
+    post:
+      tags:
+        - Hedonic Pricing
+      summary: Estimar modelo hedónico
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                prices:
+                  type: array
+                  items:
+                    type: number
+                features:
+                  type: object
+                  additionalProperties:
+                    type: array
+                    items:
+                      type: number
+                model_type:
+                  type: string
+                  enum: [linear, log_linear, double_log, box_cox]
+      responses:
+        200:
+          description: Modelo estimado exitosamente
+        400:
+          description: Error en parámetros
+
+  /api/v1/ecosystem/value:
+    post:
+      tags:
+        - Ecosystem Services
+      summary: Valorar ecosistema
+      parameters:
+        - name: ecosystem_type
+          in: query
+          required: true
+          schema:
+            type: string
+        - name: area_hectares
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: discount_rate
+          in: query
+          schema:
+            type: number
+            default: 0.05
+        - name: horizon_years
+          in: query
+          schema:
+            type: integer
+            default: 30
+      responses:
+        200:
+          description: Valoración completada
+
+  /api/v1/natural-capital/price:
+    post:
+      tags:
+        - Natural Capital
+      summary: Calcular precio sombra de capital natural
+      parameters:
+        - name: stock
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: growth_rate
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: depreciation_rate
+          in: query
+          required: true
+          schema:
+            type: number
+        - name: discount_rate
+          in: query
+          schema:
+            type: number
+            default: 0.05
+      responses:
+        200:
+          description: Precio sombra calculado
+
+  /api/v1/valuation-advisor/recommend:
+    post:
+      tags:
+        - Valuation Advisor
+      summary: Recomendar método de valoración
+      parameters:
+        - name: purpose
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [investment, taxation, litigation, regulation, insurance, environmental]
+        - name: asset_type
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [residential, commercial, industrial, agricultural, natural, mixed]
+        - name: data_quality
+          in: query
+          required: true
+          schema:
+            type: string
+            enum: [excellent, good, fair, poor]
+      responses:
+        200:
+          description: Recomendación generada
+
+  /api/v1/env-hub/layers:
+    get:
+      tags:
+        - Environmental Data
+      summary: Listar capas ambientales disponibles
+      responses:
+        200:
+          description: Lista de capas
+
+  /api/v1/env-hub/layers/{layer_name}:
+    get:
+      tags:
+        - Environmental Data
+      summary: Obtener datos de capa ambiental
+      parameters:
+        - name: layer_name
+          in: path
+          required: true
+          schema:
+            type: string
+        - name: minx
+          in: query
+          schema:
+            type: number
+        - name: miny
+          in: query
+          schema:
+            type: number
+        - name: maxx
+          in: query
+          schema:
+            type: number
+        - name: maxy
+          in: query
+          schema:
+            type: number
+      responses:
+        200:
+          description: Datos de capa obtenidos

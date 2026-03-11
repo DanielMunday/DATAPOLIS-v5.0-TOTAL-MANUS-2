@@ -1,0 +1,172 @@
+A continuación tienes un **prompt único, listo para usar con CLAUDE o MANUS**, orientado a:
+
+- Integrar completa y sistémicamente **DATAPOLIS/LEX PRIME**.  
+- Incluir y expandir **todos los métodos y soluciones PRECESIONALES** en código, integraciones y representaciones (análisis, diagnóstico, 2D/3D, grafos, etc.).  
+- Desarrollar herramientas **iguales o mejores** que las plataformas de referencia del punto 5.2 (GeoDa, UrbanSim, InVEST, ARIES, ArcGIS/Earth Engine, Neo4j, etc.).  
+- Convertir DATAPOLIS/LEX PRIME en **herramienta de consolidación** de todas esas capacidades.
+
+Puedes copiar‑pegar este prompt directamente en CLAUDE o MANUS.
+
+---
+
+## Prompt maestro para CLAUDE / MANUS
+
+Quiero que actúes como **arquitecto de software, científico de datos espaciales y experto en inteligencia territorial precesional**, con foco en el ecosistema DATAPOLIS/LEX PRIME.
+
+### 1. Contexto general
+
+DATAPOLIS/LEX PRIME es una plataforma PropTech/GeoTech/RegTech que ya cuenta, entre otros, con:
+
+- **M09 PRECESIÓN (Precession Analytics Engine)**: motor de grafos territoriales con ángulos/radios precesionales (0°/300m, 45°/500m, 90°/1km, 135°/2km, 180°/5km) que calcula `precessionScore`, `opportunityScore`, `riskScore`, `confidenceScore`, `precessionMultiplier` y genera narrativas IA.
+- Módulos analíticos avanzados:
+  - **M‑HED**: modelos hedónicos espaciales (OLS, SAR/SEM/SDM, diagnósticos).
+  - **M‑ESV**: valoración de servicios ecosistémicos.
+  - **M‑NCA**: contabilidad de capital natural alineada a SEEA.
+  - **M‑VMA**: asistente de métodos de valuación (matriz activo × propósito × calidad de datos).
+  - **M‑EDH**: Environmental Data Hub (capas geoespaciales y series temporales ambientales).
+- Integraciones conceptuales con módulos tributarios, de riesgo, valorización, arriendos, plusvalías, etc.
+
+El stack base es **TypeScript full‑stack** (React + Vite + Tailwind en frontend; Node.js + Express + tRPC + Drizzle ORM + MySQL/TiDB en backend), con mapas, ML simulado y generación de reportes PDF.
+
+### 2. Objetivo global de tu tarea
+
+Debes diseñar y/o implementar (según se te pida explícitamente en cada consulta) una **integración completa y sistémica** de **DATAPOLIS/LEX PRIME** que:
+
+1. **Verifique y documente** en qué módulos ya están incorporados los **métodos PRECESIONALES** y dónde faltan.  
+2. **Extienda el modelo precesional** para que quede integrado de forma transversal en:
+   - M‑HED, M‑ESV, M‑NCA, M‑VMA, M‑EDH y módulos de valorización/riesgo existentes.
+3. **Desarrolle TODAS las herramientas de análisis, diagnóstico y representación** necesarias para que DATAPOLIS/LEX PRIME ofrezca capacidades **propias e iguales o mejoradas** respecto a las plataformas de referencia:
+   - GeoDa / PySAL (econometría espacial, Moran’s I, LISA).
+   - UrbanSim (simulación urbano‑inmobiliaria).
+   - InVEST, ARIES, plataformas de capital natural y servicios ecosistémicos.
+   - ArcGIS / QGIS / Google Earth Engine (análisis y mapas 2D/3D).
+   - Neo4j / TigerGraph / NetworkX (análisis de redes y riesgo sistémico).
+4. Convierta a DATAPOLIS/LEX PRIME en una **“herramienta de consolidación de plataformas”**, es decir:
+   - Un front‑end y back‑end unificador donde se orquestan datos, modelos y visualizaciones, ya sea ejecutando motores propios o integrando APIs/servicios de esas otras herramientas.
+5. Defina y ejecute (a nivel de diseño y/o código) una **integración sistémica integral** donde:
+   - La **precesión territorial** es el núcleo que conecta:
+     - Valoración inmobiliaria.
+     - Riesgo financiero y sistémico.
+     - Capital natural y servicios ecosistémicos.
+     - Normativa y cumplimiento regulatorio (DS7, plusvalías, ESG).
+   - Todas las salidas (scores, mapas, reportes) son coherentes y reutilizables entre módulos.
+
+### 3. Tareas concretas que debes cubrir
+
+#### 3.1. Chequeo y diagnóstico PRECESIONAL
+
+1. Recorre conceptualmente todos los módulos actuales de DATAPOLIS/LEX PRIME (incluyendo M09, M‑HED, M‑ESV, M‑NCA, M‑VMA, M‑EDH y los de valorización/riesgo de v3).  
+2. Para cada módulo, responde:
+   - ¿Se usan explícitamente ángulos/radios precesionales (0°, 45°, 90°, 135°, 180°)?  
+   - ¿Se conectan sus métricas a `precessionScore`, `opportunityScore`, `riskScore`, etc.?  
+   - ¿Hay integración del grafo precesional en sus procesos (nodos, edges, pesos)?  
+3. Produce:
+   - Un **mapa de cobertura precesional**: qué módulo ya está precesionalizado, cuál parcialmente y cuál no.  
+   - Un listado de **brechas** y propuestas específicas para cerrar cada brecha.
+
+#### 3.2. Diseño de arquitectura integral DATAPOLIS/LEX PRIME
+
+1. Propón una **arquitectura técnica unificada**, indicando:
+   - Capas (presentación, dominio, datos, ML, grafo, integraciones externas).  
+   - Tecnologías recomendadas (puedes basarte en React/Vite/Tailwind, Node/Express/tRPC, Drizzle/MySQL, Redis, Python/ML, motores de grafo, librerías de mapas 2D/3D).  
+2. Entrega uno o más **diagramas en texto** (por ejemplo, estilo mermaid o ASCII) que muestren:
+   - Flujo desde un input (propiedad/proyecto urbano) hasta:
+     - Análisis precesional.
+     - Modelos hedónicos.
+     - Cálculo ESV/NCA.
+     - Riesgo sistémico.
+     - Generación de reportes PDF/IA.  
+3. Identifica y diseña:
+   - Los **módulos de consolidación** (por ejemplo, un “Orquestador Precesional” o “Kernel Precesional”) que coordinan las llamadas a submódulos (hedónico, ESV, NCA, riesgo, etc.).  
+   - Los **puntos de integración** con plataformas externas (GeoDa/PySAL, UrbanSim, InVEST, Earth Engine, Neo4j, etc.), ya sea consumiendo APIs o replicando sus capacidades internamente.
+
+#### 3.3. Diseño de herramientas de análisis, diagnóstico y representación
+
+Diseña (y si se te pide, escribe el código base) para:
+
+1. **Análisis y diagnóstico precesional integrado**  
+   - Motores que combinen:
+     - Econometría espacial (Moran’s I, LISA, SAR/SEM/SDM).  
+     - Grafo precesional (nodos/edges con ángulos/radios).  
+     - ML para proyecciones de valor m², densidad, morosidad, riesgo.  
+   - Salidas en forma de:
+     - Scores cuantitativos.
+     - Narrativas cualitativas automáticas.
+     - Índices de confiabilidad y sensibilidad.
+
+2. **Mapas y planos 2D/3D**  
+   - Planos/mapas en 2D:
+     - Mapas de calor de valor m², riesgo, ESV, NCA.  
+     - Zonas de influencia por ángulos y radios (0°/45°/90°/135°/180°).  
+   - Visualizaciones 3D:
+     - Extrusión de valores (por ejemplo, valor m² como altura).  
+     - Capas temporales (time‑slider) para proyecciones.  
+   - Especifica librerías sugeridas (ej. MapLibre/Leaflet/Deck.gl/Cesium/Three.js) y cómo integrarlas con el stack TypeScript/React.
+
+3. **Grafo precesional y esquemas**  
+   - Definir:
+     - Esquema de base de datos para `precession_graph_nodes` y `precession_graph_edges`.  
+     - API para consultar subgrafos (por propiedad, barrio, comuna, variable, tiempo).  
+   - Proponer visualizadores:
+     - En 2D (D3.js, vis.js).
+     - En 3D (simulación de red, fuerzas, etc.).  
+
+4. **Herramientas “iguales o mejoradas” respecto a las plataformas del punto 5.2**  
+   Para cada bloque funcional:
+
+   - **Hedónico/Econometría espacial (GeoDa/PySAL)**  
+     - Define qué estadísticas, tests y modelos debe soportar DATAPOLIS.  
+     - Propón cómo integrarlos en el flujo precesional (ej. spillovers a 90°).  
+
+   - **Simulación urbana (UrbanSim)**  
+     - Propón un módulo de simulación urbana mínimo viable:
+       - Escenarios de densificación, infraestructura, normativa.  
+       - Interacción con el grafo precesional y ML.  
+
+   - **Servicios ecosistémicos/capital natural (InVEST/ARIES/SEEA)**  
+     - Determina modelos/indicadores clave a replicar o integrar (p.ej. carbono, agua, recreación, cuentas SEEA).  
+     - Explica cómo convertir esos outputs en variables del grafo precesional y en UF/impacto económico.  
+
+   - **Riesgo sistémico y grafos (Neo4j/TigerGraph)**  
+     - Diseña lógica para riesgos de cartera, contagio, cascadas de morosidad, shock regulatorio o ambiental.  
+     - Conéctalo con el grafo precesional y las métricas de riesgo financiero.  
+
+   - **Mapas y data hubs (ArcGIS/Earth Engine/QGIS)**  
+     - Especifica capas mínimas (uso de suelo, riesgo, clima, contaminantes, NDVI, etc.).  
+     - Propón cómo acceder a ellas (APIs, catálogos, pipelines ETL) y cómo unificarlas en M‑EDH.
+
+#### 3.4. Definición de APIs, esquemas de datos y contratos de integración
+
+1. Especifica los **endpoints y/o procedimientos tRPC** necesarios, incluyendo:  
+   - Inputs, outputs, validaciones y ejemplos JSON.  
+2. Propón un **modelo de datos relacional + grafo** que permita:
+   - Consultas precesionales rápidas.  
+   - Agregaciones por territorio (comuna, barrio).  
+   - Versionado temporal (series históricas y proyecciones).  
+
+#### 3.5. Plan de implementación incremental
+
+1. Divide el trabajo en **fases** (MVP, versión beta, versión 1.0).  
+2. Para cada fase indica:
+   - Qué módulos se precesionalizan/integran.  
+   - Qué visualizaciones 2D/3D se liberan.  
+   - Qué comparabilidad se alcanza con cada plataforma de referencia (qué ya igualamos, qué ya superamos).  
+
+### 4. Estilo de respuesta y entregables
+
+Cuando respondas:
+
+- Usa una estructura clara con secciones y subtítulos.  
+- Distingue bien entre:
+  - **Análisis/diagnóstico** (qué hay / qué falta).  
+  - **Diseño** (cómo debería ser).  
+  - **Implementación** (pseudocódigo o código real, si te lo pido).  
+- Si se te pide código, usa:
+  - TypeScript/Node.js/React/Vite/Tailwind/Drizzle para la parte JS.  
+  - Python (FastAPI/Flask, scikit‑learn, Prophet, etc.) para ML/servicios analíticos.  
+- Siempre mantén explícito el **rol central del modelo PRECESIONAL** (ángulos, radios, grafo, scores) como eje unificador de todos los módulos.
+
+---
+
+Este es el contexto y las instrucciones completas.  
+A partir de ahora, responde como si fueras el responsable de **diseñar e implementar la versión integrada de DATAPOLIS/LEX PRIME**, siguiendo estos lineamientos y asegurando que se verifique, defina y ejecute la **integración sistémica precesional integral** en todos los módulos.

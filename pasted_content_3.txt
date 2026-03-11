@@ -1,0 +1,385 @@
+A continuación tienes el **PROMPT ÚNICO ACTUALIZADO**, ya modificado para incluir explícitamente:
+
+- La solicitud de que se **desarrollen al 100 % TODOS los módulos de DATAPOLIS**,  
+- **Al mismo nivel de desarrollo y rigor** que el Producto 7 (Copropiedades Manager Pro),  
+- Y que el resultado permita la **implementación total de la plataforma** y su **funcionamiento** en:
+  - servidor local,
+  - red propia,
+  - y la web pública de DATAPOLIS,  
+- Incluyendo la **etapa de pruebas (técnicas y de negocio) y preparación comercial**.
+
+Puedes copiarlo y pegarlo directamente en MANUS o Claude Opus 4.6.
+
+---
+
+## PROMPT ÚNICO FINAL ACTUALIZADO PARA MANUS / CLAUDE OPUS 4.6
+
+Quiero que actúes como **arquitecto de software senior + tech lead full‑stack + MLOps + DevOps + experto en econometría espacial, capital natural, derecho tributario chileno, SII, Ley 21.442, Ley 21.210, Ley 21.121, LGUC, LIR, Código Tributario, Basilea III/IV y estrategia SaaS B2B/B2G**.
+
+Tu tarea es **entregar en una sola respuesta** TODO lo necesario para dejar **DATAPOLIS v5.0 TOTAL**:
+
+1. **Completamente desarrollado al 100 % en todos sus módulos** (no solo Producto 7).  
+2. **Con cada módulo al mismo nivel de detalle y madurez que el Producto 7 – Copropiedades Manager Pro** (es decir, con lógica de negocio completa, validaciones, pruebas, documentación y exposición en la API y el frontend).  
+3. **Listo para ser implementado y funcionar**:
+   - en **servidor local** (por ejemplo, con Docker/docker‑compose en una máquina on‑premise),  
+   - en una **red propia** (intranet o datacenter privado),  
+   - y en la **web pública de DATAPOLIS** (entorno de producción con dominio y HTTPS).  
+4. Con una **etapa de pruebas y comercialización** definida y soportada por:
+   - tests automatizados (unitarios, integración, E2E),
+   - scripts de despliegue y validación,
+   - documentación para clientes, reguladores e inversionistas,
+   - y una estructura mínima para operar comercialmente (planes, pagos, onboarding).
+
+---
+
+### 1. Alcance funcional: TODOS los módulos de DATAPOLIS al 100 %
+
+Debes considerar y desarrollar **íntegramente** los siguientes bloques:
+
+#### 1.1 Núcleo v3.0 (PropTech + FinTech + RegTech + GovTech)
+
+1. **PropTech**  
+   - M00 – Expediente  
+   - M01 – Ficha Propiedad  
+   - M02 – Copropiedad  
+   - M03 – Portafolios / Inversión  
+   - M04 – Valorización ML (modelos de precios automatizados)  
+   - M05 – Arriendos  
+   - M06 – Mantenciones  
+   - M07 – Inversiones (flujos, TIR, VAN)  
+   - M08 – Contabilidad básica propiedades  
+   - MS – Mercado de Suelo  
+
+2. **FinTech**  
+   - M01‑OF – Open Finance / NCG‑514 / FAPI 2.0 (integración bancaria)  
+   - M03 – Credit Scoring (Basel III/IV)  
+   - M04 – Valorización ML (ya mencionado, pero ahora completo con endpoints y vistas)  
+   - M13 – Garantías y colaterales  
+   - M16 – Basel IV (métricas de riesgo, RWAs, PD/LGD, etc.)  
+   - RR – Rentabilidad Real de inversiones inmobiliarias  
+
+3. **RegTech**  
+   - M10 – Reportes regulatorios (CMF, SII, otros)  
+   - M11 – PAE (Plan de Acción Especial / regularización)  
+   - M14 – Reavalúo SII  
+   - GT‑PV – Plusvalías Urbanas Ley 21.713 (Gestor de Plusvalías)  
+
+4. **GovTech**  
+   - M17 – GIRES (Gestor Integrado de Riesgos Naturales)  
+   - M22 – ÁGORA (visor geoespacial)  
+   - IE – Indicadores Económicos territoriales  
+   - IA – Plusvalías (indicadores analíticos de plusvalía urbana)
+
+#### 1.2 Capa ESG / Capital Natural v4.0
+
+Desarrollar por completo:
+
+- `m_hedonic.py` – Precios hedónicos espaciales  
+  - Modelos: lineal, log‑lineal, double‑log, Box‑Cox.  
+  - Diagnósticos: VIF, Moran’s I, prueba de autocorrelación.  
+  - Ajuste de modelos SAR/SEM simplificados cuando proceda.  
+  - Cálculo de elasticidades y precios implícitos por atributo.  
+
+- `m_ecosystem_services.py` – Valoración de servicios ecosistémicos  
+  - Lógica de value transfer (valores por ha por tipo de ecosistema).  
+  - Cálculo de valor anual y NPV a distintas tasas de descuento.  
+
+- `m_natural_capital.py` – Capital natural  
+  - Modelo bioeconómico tipo Schaefer (stock, crecimiento, extracción).  
+  - Cálculo de flujo sostenible y precios sombra.  
+
+- `m_valuation_advisor.py` – Asesor de métodos de valuación  
+  - Selección de método (Income, Market, Asset, Hedonic, ML, NaturalCapital) según propósito, tipo de activo y calidad de datos.  
+
+- `m_env_hub.py` – Environmental Data Hub  
+  - Gestión de capas ambientales (aire, agua, suelo, biodiversidad, clima, usos de suelo).  
+  - Endpoints para consultar, agregar y combinar capas.  
+
+Cada uno de estos módulos debe tener:
+
+- Servicios FastAPI (lógica),  
+- Routers REST con endpoints claros,  
+- Schemas Pydantic,  
+- Test unitarios,  
+- Y vistas de frontend simples pero funcionales.
+
+#### 1.3 Capa Compliance Tributario y Producto 7 v5.0
+
+Implementar al **100 %** y con el **mismo nivel de detalle** para TODOS los módulos siguientes (no solo a nivel conceptual, sino con código funcional):
+
+- **M‑ACC** – Contabilidad General  
+  - Contabilidad de partida doble.  
+  - Libros Mayor, Diario, Inventarios.  
+  - Asientos contables (alta, modificación, anulación con trazabilidad).  
+  - Balances de prueba, estados de resultado y de situación.  
+
+- **M‑TAX** – Cálculos Tributarios (Chile)  
+  - Renta bruta, gastos deducibles/no deducibles.  
+  - Renta líquida imponible.  
+  - Impuesto calculado (según LIR vigente).  
+  - Retenciones y provisiones.  
+
+- **M‑DJ** – Declaraciones Juradas  
+  - Generación de DJ de Renta (F22) para el contexto de copropiedades.  
+  - DJ de IVA y DJ de retenciones relevantes.  
+  - Estructuras de datos y formatos compatibles con SII.  
+
+- **M‑CERT** – Certificados  
+  - Certificado de Cumplimiento Tributario de la Copropiedad.  
+  - Otros certificados relevantes (por ejemplo, de situación financiera/contable).  
+
+- **M‑SII** – Integración con SII  
+  - Cliente para llamadas a la API del SII (modo sandbox, simulación).  
+  - Envío de DJs y certificados, recepción de acuses y errores.  
+
+- **M‑CONT** – Gestión de Contratos  
+  - Contratos de antenas, arriendos de espacios comunes, servicios adicionales.  
+  - Renovaciones, vencimientos, prorrateos, alertas.  
+
+- **M‑EXTRA** – Ingresos Adicionales  
+  - Registro de ingresos distintos de los GGCC.  
+  - Distribución de esos ingresos a unidades/copropietarios según reglas.  
+
+- **M‑AUDIT** – Auditoría y Delitos Económicos (Ley 21.121)  
+  - Registro de todos los eventos críticos (alta/modificación/borrado de asientos, DJs, certificados, contratos, parámetros).  
+  - Trazabilidad (quién, qué, cuándo, desde qué IP).  
+  - Reglas básicas de detección de anomalías y alertas.  
+
+- **M‑RISK** – Riesgo de Cartera (Basilea III/IV, CMF)  
+  - Métricas PD/LGD a nivel de copropiedad/edificio.  
+  - Exposición al riesgo de cartera asociada a edificios en copropiedad.  
+  - Resumen apto para bancos y aseguradoras.
+
+---
+
+### 2. Alcance técnico completo (backend, frontend, despliegue)
+
+Debes generar **todos los archivos nuevos o modificados** en el siguiente formato:
+
+```markdown
+filename: RUTA/DEL/ARCHIVO.ext
+```tipo
+# Contenido completo del archivo
+...
+```
+
+#### 2.1. Metadatos y empaquetado
+
+- `VERSION`  
+  - Debe indicar explícitamente:  
+    `DATAPOLIS v5.0.0 – 100% Complete – Production Ready – PropTech FinTech RegTech GovTech ESG Compliance Edition`.
+
+- `README.md`  
+  - Resumen de DATAPOLIS v5.0.  
+  - Lista de módulos (v3.0, v4.0, v5.0) y breve descripción.  
+  - Instalación rápida con Docker/docker‑compose.  
+  - Referencia a `docs/`.
+
+- `LICENSE` (p.ej. MIT).
+
+#### 2.2. Backend FastAPI
+
+Asume que el núcleo v3.0/v4.0 existe conceptualmente, pero **debes proporcionar** todos los archivos nuevos o actualizados para que el proyecto quede completo y ejecutable.
+
+Incluye al menos:
+
+1. **Punto de entrada**  
+   ```markdown
+   filename: backend/fastapi/app/main.py
+   ```python
+   # Debe crear la app FastAPI, agregar middlewares, registrar TODOS los routers (v3.0, v4.0, v5.0),
+   # incluir endpoints de healthcheck, metrics, etc.
+   ```
+
+2. **Servicios (services)**  
+   Crear/actualizar archivos `backend/fastapi/app/services/` para TODOS los módulos que no estuvieran completos:
+
+   - `m_hedonic.py`  
+   - `m_ecosystem_services.py`  
+   - `m_natural_capital.py`  
+   - `m_valuation_advisor.py`  
+   - `m_env_hub.py`  
+   - `m_acc.py`  
+   - `m_tax.py`  
+   - `m_dj.py`  
+   - `m_cert.py`  
+   - `m_sii.py`  
+   - `m_cont.py`  
+   - `m_extra.py`  
+   - `m_audit.py`  
+   - `m_risk.py`  
+
+   Cada uno con lógica de negocio funcional (no solo estructuras vacías).
+
+3. **Routers FastAPI**
+
+   En `backend/fastapi/app/routers/`:
+
+   - `hedonic.py`  
+   - `ecosystem_services.py`  
+   - `natural_capital.py`  
+   - `valuation_advisor.py`  
+   - `env_hub.py`  
+   - `acc.py`  
+   - `tax.py`  
+   - `dj.py`  
+   - `cert.py`  
+   - `sii.py`  
+   - `cont.py`  
+   - `extra.py`  
+   - `audit.py`  
+   - `risk.py`  
+
+   Con endpoints REST claros (POST/GET/PUT/DELETE según corresponda) y uso de schemas Pydantic.
+
+4. **Schemas Pydantic**
+
+   En `backend/fastapi/app/schemas/`:
+
+   - `hedonic.py`  
+   - `ecosystem_services.py`  
+   - `natural_capital.py`  
+   - `valuation_advisor.py`  
+   - `env_hub.py`  
+   - `acc.py`  
+   - `tax.py`  
+   - `dj.py`  
+   - `cert.py`  
+   - `sii.py`  
+   - `cont.py`  
+   - `extra.py`  
+   - `audit.py`  
+   - `risk.py`  
+
+5. **OpenAPI actualizado**
+
+   ```markdown
+   filename: backend/fastapi/openapi.yaml
+   ```yaml
+   # Debe incluir:
+   # - Tags: HedonicPricing, EcosystemServices, NaturalCapital, ValuationAdvisor, EnvironmentalData,
+   #         Accounting, Tax, DJ, Cert, SII, Contracts, ExtraIncome, Audit, Risk, etc.
+   # - Paths para TODOS los endpoints nuevos y existentes.
+   ```
+
+6. **Dependencias**
+
+   ```markdown
+   filename: backend/fastapi/requirements.txt
+   ```text
+   # Lista completa de dependencias: fastapi, uvicorn, pydantic, sqlalchemy, psycopg2, alembic,
+   # numpy, pandas, statsmodels, pysal (u otra para Moran), geopandas, shapely, requests,
+   # redis, python-jose (JWT), etc.
+   ```
+
+7. **Configuración y despliegue**
+
+   - `backend/fastapi/Dockerfile` – imagen backend.  
+   - `docker-compose.yml` – orquesta backend, frontend, PostgreSQL/PostGIS y Redis.  
+   - `.env.example` – variables de entorno (DB, Redis, SII sandbox, secrets, etc.).
+
+#### 2.3. Frontend Vue 3
+
+1. **Vistas nuevas o actualizadas para exponer v4.0/v5.0**
+
+   En `frontend/src/views/`:
+
+   - `HedonicPanel.vue`  
+   - `EcosystemDashboard.vue`  
+   - `ValuationAdvisor.vue`  
+   - `EnvHubViewer.vue`  
+   - `AccPanel.vue`  
+   - `TaxPanel.vue`  
+   - `DJPanel.vue`  
+   - `CertPanel.vue`  
+   - `SIIIntegration.vue`  
+   - `ContractPanel.vue`  
+   - `ExtraIncomePanel.vue`  
+   - `AuditPanel.vue`  
+   - `RiskPanel.vue`  
+
+   Cada una con formularios simples, llamadas a la API y visualización de resultados.
+
+2. **Router**
+
+   ```markdown
+   filename: frontend/src/router/index.js
+   ```javascript
+   // Rutas para todas las vistas nuevas y las existentes.
+   ```
+
+3. **Servicios de API**
+
+   ```markdown
+   filename: frontend/src/services/api.js
+   ```javascript
+   // Métodos para llamar a TODOS los endpoints del backend.
+   ```
+
+4. **Configuración y build**
+
+   - `frontend/Dockerfile`  
+   - `vite.config.js`  
+   - `package.json` con scripts `dev`, `build`, `preview`.
+
+#### 2.4. Tests, CI/CD y scripts
+
+1. **Tests unitarios y E2E**
+
+   En `tests/`:
+
+   - `test_hedonic.py`, `test_ecosystem_services.py`, `test_natural_capital.py`, `test_valuation_advisor.py`, `test_env_hub.py`  
+   - `test_acc.py`, `test_tax.py`, `test_dj.py`, `test_cert.py`, `test_sii.py`, `test_cont.py`, `test_extra.py`, `test_audit.py`, `test_risk.py`  
+   - `test_e2e_v5.py` – un flujo extremo a extremo que recorra GGCC → contabilidad → tributación → DJs/certificados → SII → auditoría → contratos/ingresos extra.
+
+2. **CI/CD (GitHub Actions)**
+
+   ```markdown
+   filename: ci/.github/workflows/ci.yml
+   ```yaml
+   # Pipeline que:
+   # - Instala dependencias backend y frontend.
+   # - Levanta servicios de BD/Redis para test.
+   # - Ejecuta pytest y tests de frontend si aplica.
+   # - Valida openapi.yaml.
+   # - Opcional: build de imágenes Docker.
+   ```
+
+3. **Scripts de operación**
+
+   - `scripts/build_and_zip.sh` – genera `DATAPOLIS_v5_Full.zip`.  
+   - `scripts/validate_100_percent.sh` – verifica presencia de módulos, ejecuta tests y reporta estado.  
+   - `scripts/deploy_local.sh` – despliegue en servidor local usando docker‑compose.  
+   - `scripts/deploy_web.sh` – pasos base para desplegar en un servidor web (p.ej. Nginx + Docker).
+
+#### 2.5. Documentación y etapa comercial
+
+En `docs/`:
+
+- `ARCHITECTURE.md` – arquitectura completa v3.0 + v4.0 + v5.0.  
+- `API_REFERENCE.md` – detalles de todos los endpoints (incluidos compliance y ESG).  
+- `DEPLOY_LOCAL.md` – guía para desplegar en servidor local / red propia.  
+- `DEPLOY_WEB.md` – guía para desplegar en la web (Nginx, HTTPS, dominios).  
+- `DATAPOLIS_v5_INVERSIONISTAS.md` – caso de negocio y proyecciones.  
+- `DATAPOLIS_v5_CLIENTES.md` – guía para administradoras, bancos, aseguradoras.  
+- `DATAPOLIS_v5_REGULADOR.md` – alineación con todas las normas chilenas relevantes.  
+- `COMMERCIAL_STRATEGY.md` – estrategia comercial, pricing, canales.  
+- `ARGUMENTO_COMERCIAL_Administradores_Bancos_Aseguradoras.md` – argumentario específico.  
+- `GANTT_2026_2028.md` – cronograma y KPIs.  
+- `FODA.md` – análisis FODA.  
+- `CHECKLIST_100_PERCENT_v5.md` – checklist marcando todos los módulos v3.0/v4.0/v5.0 al 100 %.
+
+---
+
+### 3. Reglas finales
+
+1. **No incluyas explicaciones fuera de los bloques de archivos**.  
+2. Cada archivo debe contener contenido completo y ejecutable (no `TODO`, no comentarios vacíos).  
+3. El resultado debe permitir:
+
+   - Levantar DATAPOLIS v5.0 TOTAL en **servidor local** y **red propia** con `docker-compose up`.  
+   - Desplegarlo en un **servidor web de producción** siguiendo `DEPLOY_WEB.md`.  
+   - Ejecutar la **etapa de pruebas** corrigiendo `scripts/validate_100_percent.sh` y los tests.  
+   - Entrar en una **etapa comercial** con documentación y argumentarios ya listos.
+
+Procede ahora a generar **TODOS LOS ARCHIVOS** requeridos, en el formato especificado, desarrollando al 100 % todos los módulos de DATAPOLIS al mismo nivel de detalle y completitud que el Producto 7, e integrándolos en una única plataforma v5.0 TOTAL lista para operación real.

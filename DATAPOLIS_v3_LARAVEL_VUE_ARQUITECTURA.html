@@ -1,0 +1,1156 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DATAPOLIS v3.0 - Arquitectura Laravel 11 + Vue 3</title>
+    <style>
+        :root {
+            --primary: #1a365d;
+            --secondary: #2563eb;
+            --accent: #0ea5e9;
+            --success: #059669;
+            --warning: #d97706;
+            --danger: #dc2626;
+            --proptech: #6366f1;
+            --fintech: #10b981;
+            --regtech: #f59e0b;
+            --geotech: #06b6d4;
+            --govtech: #8b5cf6;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', system-ui, sans-serif;
+            line-height: 1.7;
+            color: #1e293b;
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+        }
+        .container { max-width: 1400px; margin: 0 auto; padding: 2rem; }
+        header {
+            background: linear-gradient(135deg, var(--primary) 0%, #0f172a 100%);
+            color: white;
+            padding: 3rem;
+            margin-bottom: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        header h1 { font-size: 2.5rem; margin-bottom: 0.5rem; }
+        .badge-container { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: 1.5rem; }
+        .badge {
+            background: rgba(255,255,255,0.15);
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.85rem;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255,255,255,0.2);
+        }
+        .badge.laravel { background: linear-gradient(135deg, #ff2d20 0%, #e32929 100%); }
+        .badge.vue { background: linear-gradient(135deg, #42b883 0%, #35495e 100%); }
+        .badge.postgres { background: linear-gradient(135deg, #336791 0%, #2e5a7d 100%); }
+        .badge.ai { background: linear-gradient(135deg, #8b5cf6 0%, #6366f1 100%); }
+        section {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        }
+        h2 {
+            color: var(--primary);
+            border-bottom: 3px solid var(--accent);
+            padding-bottom: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.75rem;
+        }
+        h3 { color: var(--secondary); margin: 1.5rem 0 1rem; font-size: 1.25rem; }
+        h4 { color: #475569; margin: 1rem 0 0.5rem; }
+        .architecture-diagram {
+            background: #0f172a;
+            color: #e2e8f0;
+            padding: 1.5rem;
+            border-radius: 0.75rem;
+            font-family: 'Consolas', monospace;
+            font-size: 0.75rem;
+            overflow-x: auto;
+            white-space: pre;
+            line-height: 1.4;
+        }
+        .module-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+            gap: 1.5rem;
+        }
+        .module-card {
+            border: 2px solid #e2e8f0;
+            border-radius: 0.75rem;
+            padding: 1.5rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+        .module-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        }
+        .module-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+        }
+        .module-card.proptech::before { background: var(--proptech); }
+        .module-card.fintech::before { background: var(--fintech); }
+        .module-card.regtech::before { background: var(--regtech); }
+        .module-card.geotech::before { background: var(--geotech); }
+        .module-card.govtech::before { background: var(--govtech); }
+        .module-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1rem; }
+        .module-code {
+            font-family: monospace;
+            font-weight: bold;
+            padding: 0.25rem 0.5rem;
+            border-radius: 0.25rem;
+            font-size: 0.85rem;
+        }
+        .proptech .module-code { background: #eef2ff; color: var(--proptech); }
+        .fintech .module-code { background: #ecfdf5; color: var(--fintech); }
+        .regtech .module-code { background: #fffbeb; color: var(--regtech); }
+        .geotech .module-code { background: #ecfeff; color: var(--geotech); }
+        .govtech .module-code { background: #f5f3ff; color: var(--govtech); }
+        .endpoint-list { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: 0.75rem; }
+        .endpoint {
+            font-family: monospace;
+            font-size: 0.7rem;
+            padding: 0.2rem 0.4rem;
+            background: #f1f5f9;
+            border-radius: 0.25rem;
+        }
+        table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.9rem; }
+        th, td { padding: 0.6rem; text-align: left; border: 1px solid #e2e8f0; }
+        th { background: var(--primary); color: white; }
+        tr:nth-child(even) { background: #f8fafc; }
+        code {
+            background: #f1f5f9;
+            padding: 0.15rem 0.4rem;
+            border-radius: 0.25rem;
+            font-family: 'Consolas', monospace;
+            font-size: 0.85em;
+        }
+        pre {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            overflow-x: auto;
+            font-size: 0.8rem;
+            line-height: 1.4;
+        }
+        .tech-stack { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 1rem 0; }
+        .tech-tag {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.3rem 0.6rem;
+            border-radius: 2rem;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .tech-tag.backend { background: #fee2e2; color: #991b1b; }
+        .tech-tag.frontend { background: #d1fae5; color: #065f46; }
+        .tech-tag.database { background: #dbeafe; color: #1e40af; }
+        .tech-tag.infra { background: #fef3c7; color: #92400e; }
+        .tech-tag.ai { background: #ede9fe; color: #5b21b6; }
+        .agent-card {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            color: white;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin-bottom: 0.75rem;
+        }
+        .agent-header { display: flex; align-items: center; gap: 0.75rem; margin-bottom: 0.5rem; }
+        .agent-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 0.5rem;
+            background: rgba(255,255,255,0.15);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+        }
+        .alert { padding: 1rem; border-radius: 0.5rem; margin: 1rem 0; }
+        .alert-info { background: #dbeafe; border-left: 4px solid #2563eb; color: #1e40af; }
+        .alert-success { background: #d1fae5; border-left: 4px solid #059669; color: #065f46; }
+        .alert-warning { background: #fef3c7; border-left: 4px solid #d97706; color: #92400e; }
+        .stat-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 1rem; margin: 1.5rem 0; }
+        .stat-card {
+            text-align: center;
+            padding: 1.25rem;
+            background: linear-gradient(135deg, var(--primary) 0%, #1e3a5f 100%);
+            color: white;
+            border-radius: 0.75rem;
+        }
+        .stat-value { font-size: 2rem; font-weight: bold; display: block; }
+        .stat-label { font-size: 0.8rem; opacity: 0.9; }
+        .timeline { position: relative; padding-left: 2rem; }
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 3px;
+            background: linear-gradient(to bottom, var(--accent), var(--success));
+        }
+        .timeline-item {
+            position: relative;
+            padding: 1rem;
+            background: #f8fafc;
+            border-radius: 0.75rem;
+            margin-bottom: 1rem;
+        }
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -2.35rem;
+            top: 1.5rem;
+            width: 10px;
+            height: 10px;
+            background: var(--secondary);
+            border-radius: 50%;
+            border: 2px solid white;
+            box-shadow: 0 0 0 2px var(--accent);
+        }
+        .file-tree {
+            background: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.75rem;
+            font-family: 'Consolas', monospace;
+            font-size: 0.75rem;
+            line-height: 1.5;
+            overflow-x: auto;
+        }
+        .file-tree .folder { color: #60a5fa; }
+        .file-tree .php { color: #c084fc; }
+        .file-tree .vue { color: #4ade80; }
+        .vertical-tag {
+            display: inline-block;
+            padding: 0.2rem 0.6rem;
+            border-radius: 0.25rem;
+            font-size: 0.7rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+        .vertical-tag.proptech { background: #eef2ff; color: var(--proptech); }
+        .vertical-tag.fintech { background: #ecfdf5; color: var(--fintech); }
+        .vertical-tag.regtech { background: #fffbeb; color: var(--regtech); }
+        .vertical-tag.geotech { background: #ecfeff; color: var(--geotech); }
+        .vertical-tag.govtech { background: #f5f3ff; color: var(--govtech); }
+        .example-box {
+            background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+            border: 2px solid #f59e0b;
+            border-radius: 0.75rem;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+        .example-box h5 { color: #92400e; margin-bottom: 0.5rem; }
+        @media (max-width: 768px) {
+            .container { padding: 1rem; }
+            header h1 { font-size: 1.5rem; }
+            .module-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <header>
+        <h1>🏗️ DATAPOLIS v3.0</h1>
+        <p style="font-size: 1.2rem; opacity: 0.9;">Arquitectura Integral de Desarrollo</p>
+        <p style="opacity: 0.75;">Plataforma PropTech/FinTech/RegTech/GeoTech/GovTech - Chile</p>
+        
+        <div class="badge-container">
+            <span class="badge laravel">🔴 Laravel 11 (PHP 8.2+)</span>
+            <span class="badge vue">💚 Vue 3 + Vite</span>
+            <span class="badge postgres">🐘 PostgreSQL 16 + PostGIS</span>
+            <span class="badge ai">🤖 Multi-Agente IA (10 Agentes)</span>
+            <span class="badge">📊 23 Módulos</span>
+            <span class="badge">🇨🇱 Normativa Chilena</span>
+        </div>
+        
+        <div class="stat-grid" style="margin-top: 2rem;">
+            <div class="stat-card"><span class="stat-value">23</span><span class="stat-label">Módulos</span></div>
+            <div class="stat-card"><span class="stat-value">10</span><span class="stat-label">Agentes IA</span></div>
+            <div class="stat-card"><span class="stat-value">450+</span><span class="stat-label">Endpoints</span></div>
+            <div class="stat-card"><span class="stat-value">120+</span><span class="stat-label">Tablas DB</span></div>
+            <div class="stat-card"><span class="stat-value">15+</span><span class="stat-label">APIs</span></div>
+            <div class="stat-card"><span class="stat-value">$0</span><span class="stat-label">Costo LLM</span></div>
+        </div>
+    </header>
+
+    <!-- ARQUITECTURA -->
+    <section>
+        <h2>1. 🏛️ Arquitectura General (5 Capas)</h2>
+        <div class="architecture-diagram">
+┌─────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│                               DATAPOLIS v3.0 - LARAVEL 11 + VUE 3                                  │
+├─────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│  ┌─────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│  │                         CAPA 1: PRESENTACIÓN (Vue 3 + Vite + Pinia)                         │   │
+│  │   Vue 3 SPA │ Dashboard Admin │ ÁGORA GeoViewer │ Portal API │ Bots WhatsApp/Telegram      │   │
+│  └─────────────────────────────────────────────────────────────────────────────────────────────┘   │
+│                                              ▼                                                      │
+│  ┌─────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│  │                      CAPA 2: API GATEWAY (Laravel 11 + Sanctum)                              │   │
+│  │   REST API (450+ endpoints) │ Sanctum PAT + JWT │ Rate Limiting │ FAPI 2.0 (NCG 514)        │   │
+│  │   Middleware Pipeline │ Form Requests │ API Resources │ Policies/Gates                       │   │
+│  └─────────────────────────────────────────────────────────────────────────────────────────────┘   │
+│                                              ▼                                                      │
+│  ┌─────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│  │                        CAPA 3: SERVICIOS DE NEGOCIO (23 MÓDULOS)                             │   │
+│  │  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐                           │   │
+│  │  │ PROPTECH │ │ FINTECH  │ │ REGTECH  │ │ GEOTECH  │ │ GOVTECH  │                           │   │
+│  │  │ 5 módulo │ │ 6 módulo │ │ 4 módulo │ │ 5 módulo │ │ 3 módulo │                           │   │
+│  │  │ M00,M02  │ │ M01-OF   │ │ M05-SCF  │ │ PV⭐     │ │ RR,IE    │                           │   │
+│  │  │ M05,M08  │ │ M03,M04  │ │ M09,M10  │ │ M14,M17  │ │ PAR      │                           │   │
+│  │  │ M12      │ │ M07,M13  │ │ M11      │ │ MS,M22   │ │          │                           │   │
+│  │  │          │ │ M16      │ │          │ │          │ │          │                           │   │
+│  │  └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘                           │   │
+│  └─────────────────────────────────────────────────────────────────────────────────────────────┘   │
+│                                              ▼                                                      │
+│  ┌─────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│  │                     CAPA 4: SISTEMA MULTI-AGENTE (10 Agentes IA)                             │   │
+│  │  ┌────────────────────────────────────────────────────────────────────────────────────────┐ │   │
+│  │  │               RLM ENGINE (Orchestrator) - 1M+ tokens │ Ollama ($0)                     │ │   │
+│  │  └────────────────────────────────────────────────────────────────────────────────────────┘ │   │
+│  │  DataAgent │ ModelAgent │ RegulatoryAgent │ GeoAgent │ ReportAgent                          │   │
+│  │  NLPAgent  │ ScoreAgent │ AlertAgent │ AuditAgent │ TaxAgent                                │   │
+│  └─────────────────────────────────────────────────────────────────────────────────────────────┘   │
+│                                              ▼                                                      │
+│  ┌─────────────────────────────────────────────────────────────────────────────────────────────┐   │
+│  │                          CAPA 5: DATOS Y PERSISTENCIA                                        │   │
+│  │  PostgreSQL 16 + PostGIS 3.4 │ Redis 7 │ ChromaDB (RAG) │ MinIO/S3 │ Elasticsearch          │   │
+│  │  120+ tablas │ Índices espaciales │ Cache/Queue │ Vector DB │ Full-text search              │   │
+│  └─────────────────────────────────────────────────────────────────────────────────────────────┘   │
+└─────────────────────────────────────────────────────────────────────────────────────────────────────┘
+        </div>
+    </section>
+
+    <!-- STACK TECNOLÓGICO -->
+    <section>
+        <h2>2. 🛠️ Stack Tecnológico</h2>
+        <h3>Backend - Laravel 11</h3>
+        <div class="tech-stack">
+            <span class="tech-tag backend">Laravel 11.x</span>
+            <span class="tech-tag backend">PHP 8.2+</span>
+            <span class="tech-tag backend">Sanctum</span>
+            <span class="tech-tag backend">Eloquent ORM</span>
+            <span class="tech-tag backend">Laravel Queues</span>
+            <span class="tech-tag backend">Spatie Permission</span>
+            <span class="tech-tag backend">Laravel Excel</span>
+            <span class="tech-tag backend">DomPDF</span>
+        </div>
+        <h3>Frontend - Vue 3</h3>
+        <div class="tech-stack">
+            <span class="tech-tag frontend">Vue 3.4+</span>
+            <span class="tech-tag frontend">Vite 5.x</span>
+            <span class="tech-tag frontend">Pinia</span>
+            <span class="tech-tag frontend">Vue Router 4</span>
+            <span class="tech-tag frontend">TailwindCSS 3</span>
+            <span class="tech-tag frontend">PrimeVue</span>
+            <span class="tech-tag frontend">Leaflet</span>
+            <span class="tech-tag frontend">Chart.js</span>
+        </div>
+        <h3>Base de Datos</h3>
+        <div class="tech-stack">
+            <span class="tech-tag database">PostgreSQL 16</span>
+            <span class="tech-tag database">PostGIS 3.4</span>
+            <span class="tech-tag database">Redis 7</span>
+            <span class="tech-tag database">ChromaDB</span>
+            <span class="tech-tag database">MySQL 8 (cPanel)</span>
+        </div>
+        <h3>IA y ML</h3>
+        <div class="tech-stack">
+            <span class="tech-tag ai">Ollama (Local)</span>
+            <span class="tech-tag ai">Llama 3.2</span>
+            <span class="tech-tag ai">ChromaDB RAG</span>
+            <span class="tech-tag ai">PHP-ML</span>
+            <span class="tech-tag ai">Rubix ML</span>
+        </div>
+        <div class="alert alert-info">
+            <strong>💡 Ventaja cPanel:</strong> Laravel + Vue permite despliegue en hosting compartido con cPanel, reduciendo costos para clientes pequeños.
+        </div>
+    </section>
+
+    <!-- ESTRUCTURA DEL REPOSITORIO -->
+    <section>
+        <h2>3. 📁 Estructura del Repositorio</h2>
+        <div class="file-tree">
+<span class="folder">datapolis-v3/</span>
+├── <span class="folder">app/</span>
+│   ├── <span class="folder">Http/Controllers/Api/V1/</span>
+│   │   ├── <span class="folder">PropTech/</span> (ExpedienteController, CopropiedadController, ArriendoController, ActivoController, DueDiligenceController)
+│   │   ├── <span class="folder">FinTech/</span>  (OpenFinanceController, CreditScoreController, ValorizacionController, LiquidacionController, GarantiaController, TributarioController)
+│   │   ├── <span class="folder">RegTech/</span>  (ESGController, RRHHController, SucesionController, ExpropiaciónController)
+│   │   ├── <span class="folder">GeoTech/</span>  (PlusvaliaController⭐, TerritorialController, GIRESController, MercadoSueloController, AgoraController)
+│   │   └── <span class="folder">GovTech/</span>  (RentabilidadController, InteligenciaEconController, ParticipacionController)
+│   ├── <span class="folder">Models/</span>
+│   │   ├── <span class="folder">Core/</span> (Tenant, User, Document, AuditLog)
+│   │   ├── <span class="folder">PropTech/</span> (Predio, Propietario, Copropiedad, Arriendo, Activo, DueDiligence)
+│   │   ├── <span class="folder">FinTech/</span> (CuentaOpenFinance, Consentimiento, CreditScore, Valorizacion, Liquidacion, Garantia, ObligacionTributaria)
+│   │   ├── <span class="folder">RegTech/</span> (CumplimientoESG, Empleado, Sucesion, Expropiacion)
+│   │   ├── <span class="folder">GeoTech/</span> (Plusvalia, ImpuestoTerritorial, RiesgoGIRES, OfertaMercado, CapaGeografica)
+│   │   ├── <span class="folder">GovTech/</span> (Rentabilidad, IndicadorEconomico, Participacion)
+│   │   └── <span class="folder">Traits/</span> (HasTenant, HasVersions, HasDocuments, HasAuditLog)
+│   ├── <span class="folder">Services/</span> (PropTech/, FinTech/, RegTech/, GeoTech/, GovTech/, Integrations/)
+│   ├── <span class="folder">Agents/</span> (RLMEngine, DataAgent, ModelAgent, RegulatoryAgent, GeoAgent, ReportAgent, NLPAgent, ScoreAgent, AlertAgent, AuditAgent, TaxAgent)
+│   └── <span class="folder">Jobs/</span> (SyncSIIDataJob, CalculatePlusvaliaJob, GenerateReportJob, ProcessOpenFinanceJob)
+├── <span class="folder">config/</span> (datapolis.php, tenancy.php, integrations.php, agents.php)
+├── <span class="folder">database/migrations/</span> (120+ migraciones)
+├── <span class="folder">routes/</span> (api.php, web.php, channels.php)
+├── <span class="folder">resources/js/</span>
+│   ├── App.vue
+│   ├── <span class="folder">components/</span> (common/, proptech/, fintech/, regtech/, geotech/, govtech/)
+│   ├── <span class="folder">pages/</span> (Dashboard/, PropTech/, FinTech/, RegTech/, GeoTech/, GovTech/)
+│   ├── <span class="folder">stores/</span> (auth.js, tenant.js, proptech.js, fintech.js, geotech.js)
+│   └── router.js
+├── <span class="folder">storage/app/tenants/{tenant_id}/</span> (documents/, reports/, exports/)
+├── <span class="folder">tests/</span> (Feature/, Unit/)
+├── <span class="folder">docs/legal/</span> (LEY_21442.md, LEY_21713.md, LEY_20720.md, NCG_514.md, PRCs/)
+├── <span class="folder">docker/</span> (docker-compose.yml, php/Dockerfile, nginx/)
+├── composer.json, package.json, vite.config.js, tailwind.config.js
+        </div>
+    </section>
+
+    <!-- LOS 23 MÓDULOS -->
+    <section>
+        <h2>4. 📦 Los 23 Módulos por Vertical</h2>
+        
+        <!-- PROPTECH -->
+        <h3><span class="vertical-tag proptech">PropTech</span> Tecnología Inmobiliaria (5 módulos)</h3>
+        <div class="module-grid">
+            <div class="module-card proptech">
+                <div class="module-header">
+                    <span class="module-code">M00</span>
+                    <h4>Expediente Digital de Predio</h4>
+                </div>
+                <p>Ficha técnica integral con información catastral, legal, tributaria. Punto de entrada principal.</p>
+                <p><strong>Modelo:</strong> Predio (rol_sii, direccion, comuna_id, superficie, avaluo_fiscal, coordenadas)</p>
+                <p><strong>Integraciones:</strong> SII, CBR, DOM, ESRI</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">GET /predios</span>
+                    <span class="endpoint">POST /predios</span>
+                    <span class="endpoint">GET /predios/{id}</span>
+                    <span class="endpoint">POST /predios/{id}/sync-sii</span>
+                    <span class="endpoint">POST /predios/{id}/documentos</span>
+                    <span class="endpoint">GET /predios/{id}/export/pdf</span>
+                </div>
+            </div>
+            
+            <div class="module-card proptech">
+                <div class="module-header">
+                    <span class="module-code">M02</span>
+                    <h4>Gestión de Copropiedad</h4>
+                </div>
+                <p><strong>Ley 21.442</strong> - Administración de condominios con prorrateo, fondo de reserva (5% mínimo), asambleas.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">GET /copropiedades</span>
+                    <span class="endpoint">POST /copropiedades/{id}/calcular-prorrateo</span>
+                    <span class="endpoint">GET /copropiedades/{id}/morosidad</span>
+                    <span class="endpoint">POST /copropiedades/{id}/asambleas</span>
+                </div>
+            </div>
+            
+            <div class="module-card proptech">
+                <div class="module-header">
+                    <span class="module-code">M05-AR</span>
+                    <h4>Gestión de Arriendos</h4>
+                </div>
+                <p><strong>Ley 18.101 y 21.461</strong> - Contratos con ajuste IPC/UF, garantías, término anticipado.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">POST /arriendos</span>
+                    <span class="endpoint">POST /arriendos/{id}/reajustar</span>
+                    <span class="endpoint">POST /arriendos/{id}/termino-anticipado</span>
+                    <span class="endpoint">GET /arriendos/{id}/certificado-residencia</span>
+                </div>
+            </div>
+            
+            <div class="module-card proptech">
+                <div class="module-header">
+                    <span class="module-code">M08</span>
+                    <h4>Gestión de Activos</h4>
+                </div>
+                <p>Portfolio management con tracking de mantenimientos, seguros, depreciación y Cap Rate.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">GET /activos/portfolio</span>
+                    <span class="endpoint">GET /activos/{id}/rendimiento</span>
+                    <span class="endpoint">POST /activos/{id}/mantenimiento</span>
+                </div>
+            </div>
+            
+            <div class="module-card proptech">
+                <div class="module-header">
+                    <span class="module-code">M12</span>
+                    <h4>Due Diligence</h4>
+                </div>
+                <p>Auditoría con checklist 100+ puntos, verificación 15+ fuentes, recomendación Go/No-Go automática.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">POST /due-diligence</span>
+                    <span class="endpoint">POST /due-diligence/{id}/verificar</span>
+                    <span class="endpoint">GET /due-diligence/{id}/score</span>
+                    <span class="endpoint">GET /due-diligence/{id}/reporte</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- FINTECH -->
+        <h3 style="margin-top: 2rem;"><span class="vertical-tag fintech">FinTech</span> Tecnología Financiera (6 módulos)</h3>
+        <div class="module-grid">
+            <div class="module-card fintech">
+                <div class="module-header">
+                    <span class="module-code">M01-OF</span>
+                    <h4>Open Finance NCG 514</h4>
+                </div>
+                <p><strong>⚠️ DEADLINE: Abril 2026</strong> - FAPI 2.0, consentimientos, TPP, directorio CMF, mTLS.</p>
+                <div class="alert alert-warning" style="padding: 0.5rem; margin: 0.5rem 0;">
+                    CRÍTICO: Cumplimiento obligatorio CMF
+                </div>
+                <div class="endpoint-list">
+                    <span class="endpoint">POST /of/consentimientos</span>
+                    <span class="endpoint">GET /of/cuentas</span>
+                    <span class="endpoint">GET /of/cuentas/{id}/transacciones</span>
+                    <span class="endpoint">POST /of/pagos</span>
+                </div>
+            </div>
+            
+            <div class="module-card fintech">
+                <div class="module-header">
+                    <span class="module-code">M03</span>
+                    <h4>Credit Score ML 5D</h4>
+                </div>
+                <p>Scoring con 5 dimensiones (Capacidad 30%, Historial 25%, Colateral 20%, Capital 15%, Condiciones 10%) + SHAP.</p>
+                <p><strong>Métricas:</strong> AUC-ROC &gt; 0.85, Gini &gt; 0.70</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">POST /credit-score/calcular</span>
+                    <span class="endpoint">GET /credit-score/{id}/explicacion</span>
+                    <span class="endpoint">GET /credit-score/{id}/shap</span>
+                </div>
+            </div>
+            
+            <div class="module-card fintech">
+                <div class="module-header">
+                    <span class="module-code">M04</span>
+                    <h4>Valorización IVS 2022</h4>
+                </div>
+                <p>4 métodos: comparación, capitalización, costo, residual. Informes PDF profesionales.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">POST /valorizaciones/comparacion</span>
+                    <span class="endpoint">POST /valorizaciones/capitalizacion</span>
+                    <span class="endpoint">GET /valorizaciones/{id}/informe-pdf</span>
+                </div>
+            </div>
+            
+            <div class="module-card fintech">
+                <div class="module-header">
+                    <span class="module-code">M07-LC</span>
+                    <h4>Liquidación Ley 20.720</h4>
+                </div>
+                <p><strong>✅ COMPLETADO</strong> - Reorganización y liquidación con integración SUPERIR (2,078 líneas, 92% tests).</p>
+                <div class="alert alert-success" style="padding: 0.5rem; margin: 0.5rem 0;">Módulo completado y testeado</div>
+                <div class="endpoint-list">
+                    <span class="endpoint">POST /liquidaciones</span>
+                    <span class="endpoint">POST /liquidaciones/{id}/acreedores</span>
+                    <span class="endpoint">POST /liquidaciones/{id}/superir/sync</span>
+                </div>
+            </div>
+            
+            <div class="module-card fintech">
+                <div class="module-header">
+                    <span class="module-code">M13</span>
+                    <h4>Gestión de Garantías</h4>
+                </div>
+                <p>Hipotecas con monitoreo LTV, revaluaciones periódicas, alertas de cobertura.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">POST /garantias</span>
+                    <span class="endpoint">GET /garantias/{id}/ltv</span>
+                    <span class="endpoint">POST /garantias/{id}/revaluar</span>
+                </div>
+            </div>
+            
+            <div class="module-card fintech">
+                <div class="module-header">
+                    <span class="module-code">M16</span>
+                    <h4>Tributario Ley 21.719</h4>
+                </div>
+                <p>DJ 1879, DJ 1907, F22, F29 con integración SII.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">GET /tributario/obligaciones</span>
+                    <span class="endpoint">POST /tributario/dj1879</span>
+                    <span class="endpoint">POST /tributario/dj1907</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- REGTECH -->
+        <h3 style="margin-top: 2rem;"><span class="vertical-tag regtech">RegTech</span> Tecnología Regulatoria (4 módulos)</h3>
+        <div class="module-grid">
+            <div class="module-card regtech">
+                <div class="module-header">
+                    <span class="module-code">M05-SCF</span>
+                    <h4>Cumplimiento ESG</h4>
+                </div>
+                <p><strong>NCG 461 + NIIF S1/S2</strong> - Reporte sostenibilidad, GHG Protocol, huella de carbono.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">GET /esg/indicadores</span>
+                    <span class="endpoint">POST /esg/huella-carbono</span>
+                    <span class="endpoint">GET /esg/reporte-ncg461</span>
+                </div>
+            </div>
+            
+            <div class="module-card regtech">
+                <div class="module-header">
+                    <span class="module-code">M09</span>
+                    <h4>Gestión de Personal</h4>
+                </div>
+                <p>RRHH con integración Previred, AFP, Isapre.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">GET /empleados</span>
+                    <span class="endpoint">POST /empleados/{id}/liquidacion</span>
+                    <span class="endpoint">POST /previred/sync</span>
+                </div>
+            </div>
+            
+            <div class="module-card regtech">
+                <div class="module-header">
+                    <span class="module-code">M10</span>
+                    <h4>Sucesiones Ley 16.271</h4>
+                </div>
+                <p>Herencias con cálculo impuesto, partición, posesión efectiva.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">POST /sucesiones</span>
+                    <span class="endpoint">POST /sucesiones/{id}/particion</span>
+                    <span class="endpoint">GET /sucesiones/{id}/impuesto</span>
+                </div>
+            </div>
+            
+            <div class="module-card regtech">
+                <div class="module-header">
+                    <span class="module-code">M11</span>
+                    <h4>Expropiaciones DL 2.186</h4>
+                </div>
+                <p>Procesos de expropiación, indemnizaciones, consignaciones.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">POST /expropiaciones</span>
+                    <span class="endpoint">GET /expropiaciones/{id}/indemnizacion</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- GEOTECH -->
+        <h3 style="margin-top: 2rem;"><span class="vertical-tag geotech">GeoTech</span> Tecnología Geoespacial (5 módulos)</h3>
+        <div class="module-grid">
+            <div class="module-card geotech" style="border: 3px solid var(--geotech); background: linear-gradient(135deg, #ecfeff 0%, #cffafe 100%);">
+                <div class="module-header">
+                    <span class="module-code" style="background: var(--geotech); color: white;">PV ⭐</span>
+                    <h4>Plusvalías Urbanas</h4>
+                </div>
+                <p><strong>Ley 21.713 - MÓDULO CENTRAL</strong> - Predicción ML con mapas temáticos y reportes municipales. Integra todos los módulos.</p>
+                <div class="alert alert-info" style="padding: 0.5rem; margin: 0.5rem 0;">
+                    🌟 Usa los 10 agentes IA
+                </div>
+                <p><strong>Factores:</strong> Transporte 25%, Servicios 20%, Proyectos 15%, Normativa 15%, Mercado 15%, Riesgos 10%</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">POST /plusvalias/predecir</span>
+                    <span class="endpoint">GET /plusvalias/mapa/{comuna}</span>
+                    <span class="endpoint">GET /plusvalias/tendencias/{comuna}</span>
+                    <span class="endpoint">GET /plusvalias/reporte-municipal/{comuna}</span>
+                </div>
+            </div>
+            
+            <div class="module-card geotech">
+                <div class="module-header">
+                    <span class="module-code">M14</span>
+                    <h4>Impuestos Territoriales</h4>
+                </div>
+                <p><strong>Ley 17.235</strong> - Contribuciones, avalúos fiscales, exenciones, convenios de pago.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">GET /territorial/contribuciones</span>
+                    <span class="endpoint">POST /territorial/calcular</span>
+                    <span class="endpoint">GET /territorial/exenciones</span>
+                </div>
+            </div>
+            
+            <div class="module-card geotech">
+                <div class="module-header">
+                    <span class="module-code">M17</span>
+                    <h4>GIRES Ley 21.364</h4>
+                </div>
+                <p>Gestión de riesgos con SHOA, SERNAGEOMIN, DGA, SENAPRED. Score compuesto por zona.</p>
+                <p><strong>Riesgos:</strong> Sísmico, Tsunami, Volcánico, Aluvial, Inundación, Incendio</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">GET /gires/riesgos/{lat}/{lng}</span>
+                    <span class="endpoint">GET /gires/mapa/{tipo}</span>
+                    <span class="endpoint">GET /gires/alertas-activas</span>
+                </div>
+            </div>
+            
+            <div class="module-card geotech">
+                <div class="module-header">
+                    <span class="module-code">MS</span>
+                    <h4>Mercado de Suelo</h4>
+                </div>
+                <p>Análisis con Portal Inmobiliario, CBR, SII, TOCTOC.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">GET /mercado/ofertas</span>
+                    <span class="endpoint">GET /mercado/transacciones</span>
+                    <span class="endpoint">POST /mercado/comparables</span>
+                </div>
+            </div>
+            
+            <div class="module-card geotech">
+                <div class="module-header">
+                    <span class="module-code">M22</span>
+                    <h4>ÁGORA GeoViewer</h4>
+                </div>
+                <p>Visor Leaflet + PostGIS con capas: PRC, riesgos, valores, transacciones, proyectos.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">GET /agora/capas</span>
+                    <span class="endpoint">GET /agora/capa/{id}/geojson</span>
+                    <span class="endpoint">POST /agora/buffer</span>
+                    <span class="endpoint">POST /agora/intersect</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- GOVTECH -->
+        <h3 style="margin-top: 2rem;"><span class="vertical-tag govtech">GovTech</span> Tecnología Gubernamental (3 módulos)</h3>
+        <div class="module-grid">
+            <div class="module-card govtech">
+                <div class="module-header">
+                    <span class="module-code">RR</span>
+                    <h4>Rentabilidad Real Chile</h4>
+                </div>
+                <p>Calculadora con inflación, impuestos, costos transacción.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">POST /rentabilidad/calcular</span>
+                    <span class="endpoint">GET /rentabilidad/comparativo</span>
+                </div>
+            </div>
+            
+            <div class="module-card govtech">
+                <div class="module-header">
+                    <span class="module-code">IE</span>
+                    <h4>Inteligencia Económica</h4>
+                </div>
+                <p>Dashboard BCCh, INE, SII: UF, IPC, TPM, IMACEC, desempleo.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">GET /indicadores</span>
+                    <span class="endpoint">GET /indicadores/{tipo}</span>
+                    <span class="endpoint">GET /indicadores/dashboard</span>
+                </div>
+            </div>
+            
+            <div class="module-card govtech">
+                <div class="module-header">
+                    <span class="module-code">PAR</span>
+                    <h4>Participación Ciudadana</h4>
+                </div>
+                <p>Consultas públicas, votaciones, opiniones geolocalizadas.</p>
+                <div class="endpoint-list">
+                    <span class="endpoint">POST /participacion/consultas</span>
+                    <span class="endpoint">POST /participacion/votar</span>
+                    <span class="endpoint">GET /participacion/opiniones/mapa</span>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SISTEMA MULTI-AGENTE -->
+    <section>
+        <h2>5. 🤖 Sistema Multi-Agente (10 Agentes IA)</h2>
+        
+        <div class="agent-card">
+            <div class="agent-header">
+                <div class="agent-icon">📊</div>
+                <h4>DataAgent</h4>
+            </div>
+            <p>Sincronización con 15+ APIs: SII, CBR, CMF, DOM, ESRI, SHOA, SERNAGEOMIN, DGA, MINVU, Sentinel-2, SUPERIR, BCCh, INE, Previred.</p>
+        </div>
+        
+        <div class="agent-card">
+            <div class="agent-header">
+                <div class="agent-icon">🧮</div>
+                <h4>ModelAgent</h4>
+            </div>
+            <p>ML: Prophet (series temporales), XGBoost (scoring), ARIMA. Cálculos de plusvalía, scoring, valorización.</p>
+        </div>
+        
+        <div class="agent-card">
+            <div class="agent-header">
+                <div class="agent-icon">⚖️</div>
+                <h4>RegulatoryAgent</h4>
+            </div>
+            <p>RAG sobre LGUC, OGUC, PRC. Validación de cumplimiento legal, consultas NLP sobre regulaciones chilenas.</p>
+        </div>
+        
+        <div class="agent-card">
+            <div class="agent-header">
+                <div class="agent-icon">🗺️</div>
+                <h4>GeoAgent</h4>
+            </div>
+            <p>PostGIS: geocoding, buffer analysis, intersecciones, cálculo distancias/áreas, análisis espacial.</p>
+        </div>
+        
+        <div class="agent-card">
+            <div class="agent-header">
+                <div class="agent-icon">📄</div>
+                <h4>ReportAgent</h4>
+            </div>
+            <p>PDF/Excel con DomPDF y Laravel Excel. Dashboards Chart.js, mapas Folium.</p>
+        </div>
+        
+        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 0.75rem;">
+            <div class="agent-card">
+                <div class="agent-header"><div class="agent-icon">💬</div><h4>NLPAgent</h4></div>
+                <p>Español chileno: intenciones, entidades, sentimiento.</p>
+            </div>
+            <div class="agent-card">
+                <div class="agent-header"><div class="agent-icon">📈</div><h4>ScoreAgent</h4></div>
+                <p>Scores crédito/riesgo con SHAP explainability.</p>
+            </div>
+            <div class="agent-card">
+                <div class="agent-header"><div class="agent-icon">🔔</div><h4>AlertAgent</h4></div>
+                <p>Umbrales, vencimientos, anomalías.</p>
+            </div>
+            <div class="agent-card">
+                <div class="agent-header"><div class="agent-icon">📋</div><h4>AuditAgent</h4></div>
+                <p>Trazabilidad, audit trail regulatorio.</p>
+            </div>
+            <div class="agent-card">
+                <div class="agent-header"><div class="agent-icon">💰</div><h4>TaxAgent</h4></div>
+                <p>Cálculos SII, plusvalía, contribuciones, DJ.</p>
+            </div>
+        </div>
+        
+        <h3>Matriz Módulo-Agente</h3>
+        <table style="font-size: 0.8rem;">
+            <thead>
+                <tr><th>Módulo</th><th>Data</th><th>Model</th><th>Regul</th><th>Geo</th><th>Report</th><th>NLP</th><th>Score</th><th>Alert</th><th>Audit</th><th>Tax</th></tr>
+            </thead>
+            <tbody>
+                <tr><td><strong>PV Plusvalías⭐</strong></td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td><td>✅</td></tr>
+                <tr><td>M00 Expediente</td><td>✅</td><td></td><td>✅</td><td>✅</td><td>✅</td><td></td><td></td><td></td><td>✅</td><td></td></tr>
+                <tr><td>M01-OF Open Finance</td><td>✅</td><td></td><td>✅</td><td></td><td>✅</td><td></td><td></td><td>✅</td><td>✅</td><td></td></tr>
+                <tr><td>M03 Credit Score</td><td>✅</td><td>✅</td><td></td><td></td><td>✅</td><td></td><td>✅</td><td>✅</td><td>✅</td><td></td></tr>
+                <tr><td>M17 GIRES</td><td>✅</td><td></td><td></td><td>✅</td><td>✅</td><td></td><td>✅</td><td>✅</td><td></td><td></td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- CÓDIGO LARAVEL -->
+    <section>
+        <h2>6. 📝 Plantillas de Código Laravel/Vue</h2>
+        
+        <h3>Controller Template</h3>
+        <pre>// app/Http/Controllers/Api/V1/PropTech/ExpedienteController.php
+
+class ExpedienteController extends Controller
+{
+    public function __construct(private ExpedienteService $service) {}
+    
+    public function index(Request $request): PredioCollection
+    {
+        return new PredioCollection($this->service->list(
+            $request->only(['comuna_id', 'destino', 'search']),
+            $request->integer('per_page', 15)
+        ));
+    }
+    
+    public function store(StorePredioRequest $request): JsonResponse
+    {
+        $predio = $this->service->create($request->validated());
+        return response()->json(['data' => new PredioResource($predio)], 201);
+    }
+    
+    public function show(Predio $predio): PredioResource
+    {
+        $this->authorize('view', $predio);
+        return new PredioResource($predio->load(['propietarios', 'valorizaciones']));
+    }
+    
+    public function syncSII(Predio $predio): JsonResponse
+    {
+        $resultado = $this->service->syncWithSII($predio);
+        return response()->json(['message' => 'Sincronizado', 'data' => $resultado]);
+    }
+    
+    public function exportPdf(Predio $predio)
+    {
+        return $this->service->exportToPdf($predio);
+    }
+}</pre>
+
+        <h3>Model con Traits</h3>
+        <pre>// app/Models/PropTech/Predio.php
+
+class Predio extends Model
+{
+    use HasFactory, HasUuids, SoftDeletes;
+    use HasTenant, HasVersions, HasDocuments, HasAuditLog;
+    use HasSpatial;
+    
+    protected $fillable = [
+        'tenant_id', 'rol_sii', 'direccion', 'comuna_id',
+        'superficie_terreno', 'superficie_construida', 'destino',
+        'avaluo_fiscal', 'coordenadas', 'datos_sii', 'ultimo_sync_sii'
+    ];
+    
+    protected $casts = [
+        'coordenadas' => Point::class,
+        'avaluo_fiscal' => 'decimal:2',
+        'datos_sii' => 'array',
+        'ultimo_sync_sii' => 'datetime'
+    ];
+    
+    public function propietarios() { return $this->hasMany(Propietario::class); }
+    public function valorizaciones() { return $this->hasMany(Valorizacion::class); }
+    public function plusvalias() { return $this->hasMany(Plusvalia::class); }
+    
+    public function scopeNearby($query, Point $punto, int $metros = 1000)
+    {
+        return $query->whereRaw(
+            'ST_DWithin(coordenadas::geography, ST_SetSRID(ST_MakePoint(?, ?), 4326)::geography, ?)',
+            [$punto->longitude, $punto->latitude, $metros]
+        );
+    }
+}</pre>
+
+        <h3>HasTenant Trait</h3>
+        <pre>// app/Models/Traits/HasTenant.php
+
+trait HasTenant
+{
+    protected static function bootHasTenant(): void
+    {
+        // Auto-asignar tenant_id
+        static::creating(function ($model) {
+            if (!$model->tenant_id && auth()->check()) {
+                $model->tenant_id = auth()->user()->tenant_id;
+            }
+        });
+        
+        // Global scope para filtrar por tenant
+        static::addGlobalScope('tenant', function (Builder $builder) {
+            if (auth()->check() && !app()->runningInConsole()) {
+                $builder->where($builder->getModel()->getTable() . '.tenant_id', auth()->user()->tenant_id);
+            }
+        });
+    }
+    
+    public function tenant() { return $this->belongsTo(Tenant::class); }
+}</pre>
+
+        <h3>Vue Component</h3>
+        <pre>&lt;script setup&gt;
+import { ref, onMounted } from 'vue'
+import { usePredioStore } from '@/stores/proptech/predio'
+import { storeToRefs } from 'pinia'
+import DataTable from '@/components/common/DataTable.vue'
+
+const store = usePredioStore()
+const { predios, loading, pagination } = storeToRefs(store)
+const showForm = ref(false)
+
+const columns = [
+  { key: 'rol_sii', label: 'ROL SII', sortable: true },
+  { key: 'direccion', label: 'Dirección', sortable: true },
+  { key: 'comuna.nombre', label: 'Comuna' },
+  { key: 'avaluo_uf', label: 'Avalúo (UF)', format: 'number' },
+]
+
+onMounted(() => store.fetchPredios())
+&lt;/script&gt;
+
+&lt;template&gt;
+  &lt;div class="predios-page"&gt;
+    &lt;div class="header"&gt;
+      &lt;h1&gt;Expedientes de Predios&lt;/h1&gt;
+      &lt;button @click="showForm = true" class="btn-primary"&gt;+ Nuevo&lt;/button&gt;
+    &lt;/div&gt;
+    &lt;DataTable :columns="columns" :data="predios" :loading="loading" :pagination="pagination" /&gt;
+  &lt;/div&gt;
+&lt;/template&gt;</pre>
+
+        <h3>Pinia Store</h3>
+        <pre>// resources/js/stores/proptech/predio.js
+
+export const usePredioStore = defineStore('predio', () => {
+  const predios = ref([])
+  const loading = ref(false)
+  const pagination = ref({ current_page: 1, per_page: 15, total: 0 })
+  
+  async function fetchPredios() {
+    loading.value = true
+    try {
+      const response = await api.get('/api/v1/predios', { params: { page: pagination.value.current_page } })
+      predios.value = response.data.data
+      pagination.value = response.data.meta
+    } finally {
+      loading.value = false
+    }
+  }
+  
+  async function createPredio(data) {
+    const response = await api.post('/api/v1/predios', data)
+    predios.value.unshift(response.data.data)
+    return response.data.data
+  }
+  
+  return { predios, loading, pagination, fetchPredios, createPredio }
+})</pre>
+    </section>
+
+    <!-- INTEGRACIONES -->
+    <section>
+        <h2>7. 🔗 Integraciones Externas (15+ APIs)</h2>
+        <table>
+            <thead><tr><th>Servicio</th><th>Tipo</th><th>Datos</th><th>Módulos</th></tr></thead>
+            <tbody>
+                <tr><td><strong>SII</strong></td><td>REST/SOAP</td><td>Avalúos, roles, transferencias</td><td>M00, M04, M14, M16</td></tr>
+                <tr><td><strong>CBR</strong></td><td>Web Service</td><td>Inscripciones, hipotecas, gravámenes</td><td>M00, M12, M13</td></tr>
+                <tr><td><strong>CMF</strong></td><td>REST (NCG 514)</td><td>Directorio participantes, validación TPP</td><td>M01-OF</td></tr>
+                <tr><td><strong>DOM</strong></td><td>REST</td><td>Permisos edificación, recepciones</td><td>M00, M12</td></tr>
+                <tr><td><strong>ESRI ArcGIS</strong></td><td>REST</td><td>Mapas base, geocoding</td><td>M22, PV</td></tr>
+                <tr><td><strong>SHOA</strong></td><td>WMS/WFS</td><td>Zonas tsunami, cartas de inundación</td><td>M17</td></tr>
+                <tr><td><strong>SERNAGEOMIN</strong></td><td>WMS</td><td>Zonas volcánicas, geología</td><td>M17</td></tr>
+                <tr><td><strong>DGA</strong></td><td>REST</td><td>Derechos de agua, cauces</td><td>M17</td></tr>
+                <tr><td><strong>MINVU</strong></td><td>REST/WMS</td><td>PRC, planes reguladores</td><td>M22, PV</td></tr>
+                <tr><td><strong>BCCh</strong></td><td>REST</td><td>UF, IPC, TPM, tipo cambio</td><td>IE, M05-AR</td></tr>
+                <tr><td><strong>INE</strong></td><td>REST</td><td>Estadísticas, censos</td><td>IE, PV</td></tr>
+                <tr><td><strong>SUPERIR</strong></td><td>REST</td><td>Procedimientos insolvencia</td><td>M07-LC</td></tr>
+            </tbody>
+        </table>
+    </section>
+
+    <!-- INSTALACIÓN -->
+    <section>
+        <h2>8. 🛠️ Guía de Instalación</h2>
+        
+        <h3>A. Docker (Local/Server)</h3>
+        <pre>git clone https://github.com/datapolis/datapolis-v3.git && cd datapolis-v3
+cp .env.example .env
+docker-compose up -d
+docker exec -it datapolis-app composer install
+docker exec -it datapolis-app php artisan key:generate
+docker exec -it datapolis-app php artisan migrate --seed
+docker exec -it datapolis-app npm install && npm run build
+# → http://localhost:8000</pre>
+
+        <h3>B. cPanel (Hosting Compartido)</h3>
+        <pre># 1. Subir archivos a public_html/datapolis
+# 2. Crear BD MySQL en cPanel
+# 3. Configurar .env:
+APP_URL=https://tudominio.cl
+DB_CONNECTION=mysql
+DB_HOST=localhost
+DB_DATABASE=datapolis_db
+DB_USERNAME=datapolis_user
+CACHE_DRIVER=file
+QUEUE_CONNECTION=database
+
+# 4. En Terminal/SSH:
+cd ~/public_html/datapolis
+php composer.phar install --no-dev --optimize-autoloader
+php artisan key:generate
+php artisan migrate --seed
+php artisan config:cache && php artisan route:cache
+
+# 5. Cron job para queue:
+*/5 * * * * php /home/user/public_html/datapolis/artisan schedule:run</pre>
+
+        <div class="alert alert-warning">
+            <strong>⚠️ Limitaciones cPanel:</strong> PostgreSQL+PostGIS requiere VPS. Use MySQL 8 en shared hosting. Ollama/ChromaDB requieren servidor externo.
+        </div>
+    </section>
+
+    <!-- MANUALES -->
+    <section>
+        <h2>9. 📖 Ejemplos de Uso</h2>
+        
+        <h3>M00 Expediente Digital</h3>
+        <div class="example-box">
+            <h5>📌 Crear nuevo predio</h5>
+            <ol>
+                <li>Ir a PropTech → Predios → + Nuevo</li>
+                <li>Ingresar ROL SII (ej: 123-456)</li>
+                <li>Sistema sincroniza con SII automáticamente</li>
+                <li>Completar datos y documentos</li>
+                <li>Guardar o guardar como borrador</li>
+            </ol>
+        </div>
+        
+        <h3>PV Plusvalías Urbanas</h3>
+        <div class="example-box">
+            <h5>📌 Predecir plusvalía</h5>
+            <ol>
+                <li>GeoTech → Plusvalías → Buscar predio</li>
+                <li>Click "Predecir Plusvalía"</li>
+                <li>Seleccionar horizonte: 12/24/36 meses</li>
+                <li>Ver resultado con confianza y factores</li>
+            </ol>
+        </div>
+        
+        <div class="example-box">
+            <h5>📌 Generar reporte municipal</h5>
+            <ol>
+                <li>Plusvalías → Reportes → Reporte Municipal</li>
+                <li>Seleccionar comuna y período</li>
+                <li>Genera: resumen, mapa, top zonas, proyectos, recaudación Ley 21.713</li>
+            </ol>
+        </div>
+    </section>
+
+    <!-- ROADMAP -->
+    <section>
+        <h2>10. 🗓️ Roadmap (12 meses)</h2>
+        
+        <div class="timeline">
+            <div class="timeline-item">
+                <h4>Fase 1: Fundamentos (Meses 1-3)</h4>
+                <p>PostgreSQL+PostGIS, Laravel 11 base, Multi-tenancy, M00 Expediente, Estructura PV, Vue 3+Vite+Pinia, Docker dev</p>
+            </div>
+            <div class="timeline-item">
+                <h4>Fase 2: Core Modules (Meses 3-6)</h4>
+                <p>PV Plusvalías completo, M04 Valorización, M03 Credit Score, M14 Territorial, M17 GIRES, 4 agentes IA, RLM Engine</p>
+            </div>
+            <div class="timeline-item">
+                <h4>Fase 3: FinTech+RegTech (Meses 6-9) ⚠️</h4>
+                <p><strong>M01-OF Open Finance NCG 514 (Deadline Abril 2026)</strong>, M07-LC Liquidación, M13 Garantías, M16 Tributario, 10 agentes completos</p>
+            </div>
+            <div class="timeline-item">
+                <h4>Fase 4: Frontend+Deploy (Meses 9-12)</h4>
+                <p>Dashboard Vue 3 completo, M22 ÁGORA GeoViewer, Portales municipales, Testing 80%+, Kubernetes, Piloto Pudahuel</p>
+            </div>
+        </div>
+        
+        <h3>Métricas de Éxito</h3>
+        <table>
+            <tr><th>Métrica</th><th>Objetivo</th></tr>
+            <tr><td>Módulos implementados</td><td>23</td></tr>
+            <tr><td>Agentes IA operativos</td><td>10</td></tr>
+            <tr><td>Cobertura tests</td><td>80%+</td></tr>
+            <tr><td>Costo LLM mensual</td><td>$0 (Ollama)</td></tr>
+            <tr><td>Compliance NCG 514</td><td>100%</td></tr>
+        </table>
+    </section>
+
+    <!-- FOOTER -->
+    <footer style="text-align: center; padding: 2rem; color: #64748b;">
+        <p><strong>DATAPOLIS v3.0</strong> - Arquitectura Laravel 11 + Vue 3</p>
+        <p>23 Módulos | 10 Agentes IA | 450+ Endpoints | Normativa Chilena</p>
+        <p>Documento generado: Febrero 2026 | DATAPOLIS SpA</p>
+    </footer>
+</div>
+</body>
+</html>
